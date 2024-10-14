@@ -1,5 +1,11 @@
 #include <Arduino_FreeRTOS.h>
 
+//task profile
+typedef int Taskprofiler;
+
+Taskprofiler task1; //you will just use it to serial print (debugg)
+Taskprofiler task2;
+
 // define two tasks for Blink & AnalogRead
 void TaskBlink( void *pvParameters );
 void TaskAnalogRead( void *pvParameters );
@@ -128,6 +134,9 @@ void TaskBlink2(void *pvParameters)  // This is a task.
     vTaskDelay( 1000 / portTICK_PERIOD_MS ); // wait for one second
     digitalWrite(12, LOW);    // turn the LED off by making the voltage LOW
     vTaskDelay( 1000 / portTICK_PERIOD_MS ); // wait for one second
+    //vTaskPerioritySet(NULL,2);//To change it in the run time
+    //vTaskSuspen(task_handler);//to pause a task
+    //vTaskResume(task_handler);//to resume after stop
   }
 }
 
