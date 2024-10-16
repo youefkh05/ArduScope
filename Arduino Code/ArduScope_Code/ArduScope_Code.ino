@@ -1,7 +1,7 @@
 
 #include "Multi_Metre.h"
 
-int range=range1;
+int range=range3;
 int mode=AC_MODE;
 
 void setup() {
@@ -12,8 +12,8 @@ void setup() {
 
 void loop()
 {  
-    fint32_t x=Read_Volt(range, mode);
-    Serial.print("Volt = ");
+    fint32_t x=Read_Amp(range, mode);
+    Serial.print("Amp = ");
     Serial.println(x);
     delay(100);
 }

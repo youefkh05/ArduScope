@@ -115,73 +115,112 @@ fint32_t Read_Volt( uint8_t Vrange, uint8_t mode)
 	
 }
 
-fint32_t Read_Amp(uint16_t Iout, uint16_t Itot, uint8_t Irange, uint8_t mode)
+fint32_t Read_Amp( uint8_t Irange, uint8_t mode)
 {	
-	//check if it didn t exceed the max range (positive or negative)
-	if(810<=Iout || Iout<=200)
-  {
-		return 999.99;
-	}
 
-	//check if it was too small
-	if(406<=Iout && Iout <=414)
-  {
-		return 0.0;
-	}
+  // Iin = ISlope *  Iout + Iconst
 	
-	// I_TO_V_OUT_MCU = I_Slope * I_input + I_intercept
+  int Iout;
 
-	fint32_t I_input        =   -1;
+  Iout=-1;
 
-	fint32_t I_TO_V_OUT_MCU =   0;
+  fint32_t Iin;
 
-	switch(mode)
+	Iin = -1;
+
+	fint32_t I_Slope;
+
+	I_Slope = -1;
+
+	fint32_t Iconst;
+
+	Iconst  = -1;
+
+   switch(mode)
+  { 
+    case DC_MODE:
+
+      Iout=analogRead(OUT_DC_PIN);
+      
+      switch(Irange)
+      {
+        case  range1 ://2mAmp
+        I_Slope   =   0.139574;
+        Iconst    =   -0.28634;
+        break;
+
+        case  range2 ://20mAmp
+        I_Slope   =   83.8305;
+        Iconst    =   -173.84642;
+        break;
+
+        case  range3 ://200mAmp
+        I_Slope   =   83.8305;
+        Iconst    =   -173.84642;
+        break;
+
+        case  range4 ://1Amp
+        I_Slope  =   0.0047988;
+        Iconst    =   2.545246;
+        break;
+
+        default:
+        //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
+        break;
+      }
+    break;
+
+    case AC_MODE:
+
+      Iout=analogRead(OUT_AC_PIN);
+
+      switch(Irange)
+      {
+        case  range1 ://2mAmp
+        I_Slope   =   83.8305;
+        Iconst    =   -173.84642;
+        break;
+
+        case  range2 ://20mAmp
+        I_Slope   =   1.634254;
+        Iconst    =   -3.683854;
+        break;
+
+        case  range3 ://200mAmp
+        I_Slope   =   90.91;
+        Iconst    =   -195.4545;
+        break;
+
+        case  range4 ://1Amp
+        I_Slope  =   0.0047988;
+        Iconst    =   2.545246;
+        break;
+
+        default:
+        //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
+        break;
+      }
+    break;  
+  }
+
+  //Serial.print("Iout= ");
+  //Serial.println(Iout);
+
+  //check if it didn t exceed the max range (positive or negative)
+	if(1000<= Iout ||  Iout<=206)
   {
-		case  1 : //AC
-			I_TO_V_OUT_MCU = (Itot * 5.0) / 1024.0;
-      break;
-
-		case  2 : //DC
-			I_TO_V_OUT_MCU = (Iout * 5.0) / 1024.0;	
-      break;
-
+		return -1.99;
 	}
+    
+  //make it in volt and float  
+  fint32_t  If =  Iout*5.0/1024.0;
 
-	fint32_t I_Slope     = -1;
+  //Serial.print("If= ");
+  //Serial.println(If);
 
-	fint32_t I_intercept = -1;
-
-	switch(Irange)
-	{
-		case  1 ://2mA
-		I_Slope     = 0.86857;
-		I_intercept = 2.263;
-		break;
-
-		case  2 ://20mA
-		I_Slope     = 0.09;
-		I_intercept = 2.31;
-		break;
-
-		case  3 ://200mA
-		I_Slope     = 0.0124;
-		I_intercept = 2.01;
-		break;
-
-		case  4 ://1A
-		I_Slope     = 2.517;
-		I_intercept = 2.012;
-		break;
-
-		default:
-		//LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
-		break;
-	}
-
-	I_input = (I_TO_V_OUT_MCU - I_intercept) / I_Slope;
-	_delay_ms(5);
-
-	return I_input;
+  Iin = I_Slope*  If + Iconst; //equation
+      
+  return Iin;  
 	
 }
 

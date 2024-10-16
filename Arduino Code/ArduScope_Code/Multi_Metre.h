@@ -14,7 +14,7 @@
 
 //input
 #define   OUT_DC_PIN    (A0)
-#define   OUT_AC_PIN   (A1)
+#define   OUT_AC_PIN    (A1)
 #define   OUT_RIN_PIN   (A2)
 
 //devices
@@ -33,12 +33,12 @@
 #define   DC_MODE       (2)
 
 //MUX1
-#define   A_MUX_1   (5)
-#define   B_MUX_1   (4)
+#define   A_MUX_1       (5)
+#define   B_MUX_1       (4)
 
 //MUX2
-#define   A_MUX_2   (3)
-#define   B_MUX_2   (2)
+#define   A_MUX_2       (3)
+#define   B_MUX_2       (2)
 
 
 typedef float fint32_t;
@@ -50,7 +50,8 @@ void MM_Init(void);
 //mode:AC,DC  Range:300mV, 3v, 30v, 400v
 fint32_t Read_Volt( uint8_t Vrange, uint8_t mode);
 
-fint32_t Read_Amp(uint16_t Iout, uint16_t Itot, uint8_t Irange, uint8_t mode);
+//mode:AC,DC  Range:2mAmp, 20mAmp, 200mAmp, 1Amp
+fint32_t Read_Amp( uint8_t Vrange, uint8_t mode);
 
 fint32_t Read_Ohm(uint16_t Rout, uint8_t range);
 
