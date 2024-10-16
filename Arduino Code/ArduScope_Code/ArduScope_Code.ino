@@ -1,25 +1,19 @@
 
 #include "Multi_Metre.h"
 
+int range=range1;
+int mode=AC_MODE;
 
 void setup() {
   // Set the pins as output
-  pinMode(A_MUX_1, OUTPUT);
-  pinMode(A_MUX_2, OUTPUT);
+  MM_Init();
+  Serial.begin(9600);
 }
 
 void loop()
-{
-    // Blink A_MUX_1
-  digitalWrite(A_MUX_1, HIGH); // Turn on A_MUX_1
-  _delay_ms(1000);                // Wait for 1 second
-  digitalWrite(A_MUX_1, LOW);  // Turn off A_MUX_1
-
-  // Blink A_MUX_2
-  digitalWrite(A_MUX_2, HIGH); // Turn on A_MUX_2
-  _delay_ms(1000);                 // Wait for 1 second
-  digitalWrite(A_MUX_2, LOW);  // Turn off A_MUX_2
-
-  // Wait a second before repeating
-  _delay_ms(1000);
+{  
+    fint32_t x=Read_Volt(range, mode);
+    Serial.print("Volt = ");
+    Serial.println(x);
+    delay(100);
 }

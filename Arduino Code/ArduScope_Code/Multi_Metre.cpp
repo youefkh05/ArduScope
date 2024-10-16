@@ -9,109 +9,115 @@ void MM_Init(void)
   pinMode(B_MUX_2, OUTPUT);
 }
 
-fint32_t Read_Volt(uint16_t Vout, uint16_t Vtot, uint8_t Vrange, uint8_t mode)
+fint32_t Read_Volt( uint8_t Vrange, uint8_t mode)
 {
-	//check if it didn't exceed the max range (positive or negative)
-	if(1003<=Vout || Vout<=206)
-  {
-		return 999.99;
-	}
-	//check if it was too small
-	if(518<=Vout && Vout <=524)
-  {
-		return 0.0;
-	}
 
-  // VIN_TO_V_OUT_MCU = Vdivider * VIN + Vconst
+  // Vin = VSlope *  Vout + Vconst
 	
-	fint32_t Vdivider;
+  int Vout;
 
-	Vdivider = -1;
+  Vout=-1;
+
+  fint32_t Vin;
+
+	Vin = -1;
+
+	fint32_t V_Slope;
+
+	V_Slope = -1;
 
 	fint32_t Vconst;
 
 	Vconst  = -1;
   
-	switch(Vrange)
-	{
-		case '1'://300mV
-		Vdivider  =   5.984;
-		Vconst    =   2.47859;
-		break;
+  switch(mode)
+  { 
+    case DC_MODE:
 
-		case '2'://3V
-		Vdivider  =   0.59884;
-		Vconst    =   2.5418;
-		break;
+      Vout=analogRead(OUT_DC_PIN);
+      
+      switch(Vrange)
+      {
+        case  range1 ://300mV
+        V_Slope   =   0.139574;
+        Vconst    =   -0.28634;
+        break;
 
-		case '3'://30V
-		Vdivider  =   0.0587325;
-		Vconst    =   2.5144325;
-		break;
+        case  range2 ://3V
+        V_Slope   =   1.394078;
+        Vconst    =   -2.96428;
+        break;
 
-		case '4'://400V
-		Vdivider  =   0.0047988;
-		Vconst    =   2.545246;
-		break;
+        case  range3 ://30V
+        V_Slope  =   0.0587325;
+        Vconst    =   2.5144325;
+        break;
 
-    default:
-		//LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
-		break;
+        case  range4 ://400V
+        V_Slope  =   0.0047988;
+        Vconst    =   2.545246;
+        break;
+
+        default:
+        //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
+        break;
+      }
+    break;
+
+    case AC_MODE:
+
+      Vout=analogRead(OUT_AC_PIN);
+
+      switch(Vrange)
+      {
+        case  range1 ://300mV
+        V_Slope   =   0.1664;
+        Vconst    =   -0.35624;
+        break;
+
+        case  range2 ://3V
+        V_Slope   =   1.634254;
+        Vconst    =   -3.683854;
+        break;
+
+        case  range3 ://30V
+        V_Slope  =   0.0587325;
+        Vconst    =   2.5144325;
+        break;
+
+        case  range4 ://400V
+        V_Slope  =   0.0047988;
+        Vconst    =   2.545246;
+        break;
+
+        default:
+        //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
+        break;
+      }
+    break;  
+  }
+
+  //check if it didn t exceed the max range (positive or negative)
+	if(880<= Vout ||  Vout<=206)
+  {
+		return -1.99;
 	}
-	
-	switch(mode){
-		case '2'://DC
-    { 
-      fint32_t Val = Vout*5.0/1024.0;
-      Val = ((Val-Vconst)/(Vdivider)); //equation
-      _delay_ms(5);
-      return Val;
-		}
+    
+  //make it in volt and float  
+  fint32_t  Vf =  Vout*5.0/1024.0;
 
-		case '1'://AC
-    { 
+  //Serial.print("Vf= ");
+  //Serial.println(Vf);
 
-			if(Vtot<=(Vout+2))
-      { //AC is zero
-				  return 0.0;
-			}
-
-			switch(Vrange)
-			{
-				case '1'://300mV
-				Vout  =   Vtot-Vout+506;
-				break;
-
-				case '2'://3V
-				Vout  =   Vtot-Vout+520;
-				break;
-
-				case '3'://30V
-				Vout  =   Vtot-Vout+516;
-				break;
-
-				case '4'://400V
-				Vout  =   Vtot-Vout+522;
-				break;
-			}					
-
-			fint32_t Val;
-
-			Val = Vout*5.0/1024.0;
-
-			Val = ((Val-Vconst)/(Vdivider)); //equation
-
-			_delay_ms(5);
-			
-			return Val;
-		}
-	}   
+  Vin = V_Slope*  Vf + Vconst; //equation
+      
+  return Vin;  
 	
 }
 
 fint32_t Read_Amp(uint16_t Iout, uint16_t Itot, uint8_t Irange, uint8_t mode)
 {	
-	//check if it didn't exceed the max range (positive or negative)
+	//check if it didn t exceed the max range (positive or negative)
 	if(810<=Iout || Iout<=200)
   {
 		return 999.99;
@@ -131,11 +137,11 @@ fint32_t Read_Amp(uint16_t Iout, uint16_t Itot, uint8_t Irange, uint8_t mode)
 
 	switch(mode)
   {
-		case '1': //AC
+		case  1 : //AC
 			I_TO_V_OUT_MCU = (Itot * 5.0) / 1024.0;
       break;
 
-		case '2': //DC
+		case  2 : //DC
 			I_TO_V_OUT_MCU = (Iout * 5.0) / 1024.0;	
       break;
 
@@ -147,22 +153,22 @@ fint32_t Read_Amp(uint16_t Iout, uint16_t Itot, uint8_t Irange, uint8_t mode)
 
 	switch(Irange)
 	{
-		case '1'://2mA
+		case  1 ://2mA
 		I_Slope     = 0.86857;
 		I_intercept = 2.263;
 		break;
 
-		case '2'://20mA
+		case  2 ://20mA
 		I_Slope     = 0.09;
 		I_intercept = 2.31;
 		break;
 
-		case '3'://200mA
+		case  3 ://200mA
 		I_Slope     = 0.0124;
 		I_intercept = 2.01;
 		break;
 
-		case '4'://1A
+		case  4 ://1A
 		I_Slope     = 2.517;
 		I_intercept = 2.012;
 		break;
@@ -182,7 +188,7 @@ fint32_t Read_Amp(uint16_t Iout, uint16_t Itot, uint8_t Irange, uint8_t mode)
 fint32_t Read_Ohm(uint16_t Rout, uint8_t range)
 {
 	// range 1:10k 2:100k 3: 1M
-	if (range > '5' || range < '1')
+	if (range >  5  || range <  1 )
   {
 		return -1;
 	}
@@ -194,15 +200,15 @@ fint32_t Read_Ohm(uint16_t Rout, uint8_t range)
 
   switch(range)
   {
-    case '1'://10k  Ohm
+    case  1 ://10k  Ohm
 		Rdivider     = 0.450;
 		break;
 
-		case '2'://100k Ohm
+		case  2 ://100k Ohm
 		Rdivider     = 1.35;
 		break;
 
-		case '3'://1M   Ohm
+		case  3 ://1M   Ohm
 		Rdivider     = 10.0;
 		break;
 
@@ -226,11 +232,11 @@ void Select_Mux(uint8_t device, uint8_t range)
 	_delay_ms(100);
 	switch(device)
 	{
-		case '1':
+		case  1 :
 		{ //Ohm
 			switch(range)
 			{
-				case '1':
+				case  1 :
 				{
 					// Ohm range 1
 					digitalWrite( A_MUX_1, LOW);
@@ -239,7 +245,7 @@ void Select_Mux(uint8_t device, uint8_t range)
 				}
 				break;
 
-				case '2':
+				case  2 :
 				{
 					// Ohm range 2
 					digitalWrite( A_MUX_2, HIGH);
@@ -248,7 +254,7 @@ void Select_Mux(uint8_t device, uint8_t range)
 				}
 				break;
 
-				case '3':
+				case  3 :
 				{
 					// Ohm range 3
 					digitalWrite(  A_MUX_2,  LOW);
@@ -260,7 +266,7 @@ void Select_Mux(uint8_t device, uint8_t range)
 		}
 		break;//for ohm device
 
-		case '2'://ammeter
+		case  2 ://ammeter
 		{ 
       //there is only one range
       digitalWrite( A_MUX_1, LOW);
@@ -272,14 +278,14 @@ void Select_Mux(uint8_t device, uint8_t range)
 		}
 		break;//for Ammeter device
 
-		case '3': //voltage
+		case  3 : //voltage
 		{
 			digitalWrite( A_MUX_1, LOW);
       digitalWrite( B_MUX_1, LOW);
 			_delay_ms(100);
 			switch(range)
 			{
-				case '1':
+				case  1 :
 				{
 					// Volt range 1
           digitalWrite( A_MUX_2, LOW);
@@ -288,7 +294,7 @@ void Select_Mux(uint8_t device, uint8_t range)
 				}
 				break;
 
-				case '2':
+				case  2 :
 				{
 					// Volt range 2
           digitalWrite( A_MUX_2, HIGH);
@@ -297,7 +303,7 @@ void Select_Mux(uint8_t device, uint8_t range)
 				}
 				break;
 
-				case '3':
+				case  3 :
 				{
 					// Volt range 3
 					digitalWrite( A_MUX_2, LOW);
@@ -305,7 +311,7 @@ void Select_Mux(uint8_t device, uint8_t range)
 				}
 				break;
 
-				case '4':
+				case  4 :
 				{
 					// Volt range 4
 					digitalWrite( A_MUX_2, HIGH);
