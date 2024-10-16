@@ -224,7 +224,7 @@ fint32_t Read_Amp( uint8_t Irange, uint8_t mode)
 	
 }
 
-fint32_t Read_Ohm(uint16_t Rout, uint8_t range)
+fint32_t Read_Ohm(uint8_t range)
 {
 	// range 1:10k 2:100k 3: 1M
 	if (range >  5  || range <  1 )
@@ -232,23 +232,48 @@ fint32_t Read_Ohm(uint16_t Rout, uint8_t range)
 		return -1;
 	}
 
-	//Rin = (Rdivider *Rout)/(Max_Volt-Rout)
-  fint32_t Rdivider   =   -1;
+	//Rin = m1* Rout^2 +m2* Rout + Rconst
 
-  fint32_t Max_Volt   =   1024.0;
+  int Rout=analogRead(OUT_RIN_PIN);
+
+  fint32_t Rin  = 0;
+
+  fint32_t m1       =   -1;
+
+  fint32_t m2       =   -1;
+
+  fint32_t Rconst   =   -1;
 
   switch(range)
   {
-    case  1 ://10k  Ohm
-		Rdivider     = 0.450;
+    case  range1 ://10k  Ohm
+
+		  m1      =   7.408666;
+
+      m2      =   -58.75646;
+
+      Rconst  =   118.38925;
+
 		break;
 
-		case  2 ://100k Ohm
-		Rdivider     = 1.35;
+		case  range2 ://100k Ohm
+	
+		m1      =   874.13015;
+
+    m2      =   -8139.9605;
+
+    Rconst  =   18961.3339;
+
 		break;
 
-		case  3 ://1M   Ohm
-		Rdivider     = 10.0;
+		case  range3 ://1M   Ohm
+		
+		m1      =   17433.97271;
+
+    m2      =   -165272.9212;
+
+    Rconst  =   391784.0959;
+
 		break;
 
     default:
@@ -256,10 +281,13 @@ fint32_t Read_Ohm(uint16_t Rout, uint8_t range)
 		break;
   }
 
-	fint32_t Rin  = 0;
+  //make it in volt and float  
+  fint32_t  Rf =  Rout*5.0/1024.0;
+
+  //Serial.print("Rf= ");
+  //Serial.println(Rf);
   
-	Rin=(Rdivider *Rout)/(Max_Volt-Rout);
-	_delay_ms(5);
+	Rin=m1* Rf* Rf + m2* Rf + Rconst;
 
 	return Rin;
 

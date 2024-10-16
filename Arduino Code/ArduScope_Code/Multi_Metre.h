@@ -53,7 +53,7 @@ fint32_t Read_Volt( uint8_t Vrange, uint8_t mode);
 //mode:AC,DC  Range:2mAmp, 20mAmp, 200mAmp, 1Amp
 fint32_t Read_Amp( uint8_t Vrange, uint8_t mode);
 
-fint32_t Read_Ohm(uint16_t Rout, uint8_t range);
+fint32_t Read_Ohm( uint8_t range);
 
 void Select_Mux(uint8_t device, uint8_t range);
 

@@ -12,8 +12,8 @@ void setup() {
 
 void loop()
 {  
-    fint32_t x=Read_Amp(range, mode);
-    Serial.print("Amp = ");
+    fint32_t x=Read_Ohm(range);
+    Serial.print("Ohm = ");
     Serial.println(x);
     delay(100);
 }
