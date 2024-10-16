@@ -3,9 +3,9 @@
  <FRAME activewindow="0">
   <PLACEMENT>2c0000000200000003000000ffffffffffffffffffffffffffffffff8c0000000d000000f40600002b040000</PLACEMENT>
   <WINDOW type="default" module="ISIS">
-   <editor metric="0" gridmajor="2540000" mode="00000000" zoom="-1" scale="163" flipped="0" gridminor="254000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="127000">
+   <editor metric="0" gridmajor="25400000" mode="00000000" zoom="-1" scale="30" flipped="0" gridminor="1016000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="423333">
     <world y1="-50800000" x1="-50800000" y2="50800000" x2="50800000"/>
-    <centre x="-2540000" y="15240000"/>
+    <centre x="1524000" y="13744222"/>
     <origin x="0" y="0"/>
    </editor>
   </WINDOW>
@@ -18,9 +18,9 @@
   </editor>
  </MODULE>
  <MODULE name="ISIS">
-  <editor metric="0" gridmajor="2540000" mode="00000000" zoom="-1" scale="163" flipped="0" gridminor="254000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="127000">
+  <editor metric="0" gridmajor="25400000" mode="00000000" zoom="-1" scale="30" flipped="0" gridminor="1016000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="423333">
    <world y1="-50800000" x1="-50800000" y2="50800000" x2="50800000"/>
-   <centre x="-2540000" y="15240000"/>
+   <centre x="1524000" y="13744222"/>
    <origin x="0" y="0"/>
   </editor>
  </MODULE>
@@ -55,7 +55,7 @@
    <POPUP w="695" x="88" flags="00000000" y="200" h="459" pid="0" iid="58">
     <PROPERTIES/>
    </POPUP>
-   <POPUP w="450" x="1171" flags="00008023" y="310" h="250" pid="0" iid="60">
+   <POPUP w="450" x="1171" flags="00000022" y="310" h="250" pid="0" iid="60">
     <PROPERTIES>
      <ITEM name="AutoEcho">0</ITEM>
      <ITEM name="HexMode">0</ITEM>

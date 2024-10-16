@@ -296,14 +296,13 @@ fint32_t Read_Ohm(uint8_t range)
 void Select_Mux(uint8_t device, uint8_t range)
 {
 	
-	_delay_ms(100);
 	switch(device)
 	{
-		case  1 :
+		case  Ohmeter :
 		{ //Ohm
 			switch(range)
 			{
-				case  1 :
+				case  range1  :
 				{
 					// Ohm range 1
 					digitalWrite( A_MUX_1, LOW);
@@ -312,47 +311,46 @@ void Select_Mux(uint8_t device, uint8_t range)
 				}
 				break;
 
-				case  2 :
+				case  range2  :
 				{
 					// Ohm range 2
-					digitalWrite( A_MUX_2, HIGH);
-					digitalWrite( B_MUX_2, LOW);
+					digitalWrite( A_MUX_1, HIGH);
+					digitalWrite( B_MUX_1, LOW);
 					
 				}
 				break;
 
-				case  3 :
+				case  range3  :
 				{
 					// Ohm range 3
-					digitalWrite(  A_MUX_2,  LOW);
-					digitalWrite(  B_MUX_2, HIGH);
+					digitalWrite(  A_MUX_1,  LOW);
+					digitalWrite(  B_MUX_1, HIGH);
 					
 				}
 				break;
 			}
 		}
+    _delay_ms(2);
 		break;//for ohm device
 
-		case  2 ://ammeter
+		case  Ammeter ://ammeter
 		{ 
       //there is only one range
       digitalWrite( A_MUX_1, LOW);
       digitalWrite( B_MUX_1, LOW);
-      _delay_ms(100);
-			digitalWrite( A_MUX_2, LOW);
-      digitalWrite( B_MUX_2, LOW);
+      
 
 		}
+    _delay_ms(2);
 		break;//for Ammeter device
 
-		case  3 : //voltage
+		case  Voltmeter : //voltage
 		{
-			digitalWrite( A_MUX_1, LOW);
+			digitalWrite( A_MUX_1, HIGH);
       digitalWrite( B_MUX_1, LOW);
-			_delay_ms(100);
 			switch(range)
 			{
-				case  1 :
+				case  range1 :
 				{
 					// Volt range 1
           digitalWrite( A_MUX_2, LOW);
@@ -361,7 +359,7 @@ void Select_Mux(uint8_t device, uint8_t range)
 				}
 				break;
 
-				case  2 :
+				case  range2 :
 				{
 					// Volt range 2
           digitalWrite( A_MUX_2, HIGH);
@@ -370,7 +368,7 @@ void Select_Mux(uint8_t device, uint8_t range)
 				}
 				break;
 
-				case  3 :
+				case  range3 :
 				{
 					// Volt range 3
 					digitalWrite( A_MUX_2, LOW);
@@ -378,7 +376,7 @@ void Select_Mux(uint8_t device, uint8_t range)
 				}
 				break;
 
-				case  4 :
+				case  range4 :
 				{
 					// Volt range 4
 					digitalWrite( A_MUX_2, HIGH);
@@ -388,6 +386,7 @@ void Select_Mux(uint8_t device, uint8_t range)
 
 			}
 		}
+    _delay_ms(2);
 		break;//for volt device
 	}
   

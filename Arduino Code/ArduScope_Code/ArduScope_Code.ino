@@ -1,12 +1,14 @@
 
 #include "Multi_Metre.h"
 
-int range=range3;
-int mode=AC_MODE;
+int range=range2;
+int mode=DC_MODE;
+int device=Ohmeter;
 
 void setup() {
   // Set the pins as output
   MM_Init();
+  Select_Mux(device, range);
   Serial.begin(9600);
 }
 
