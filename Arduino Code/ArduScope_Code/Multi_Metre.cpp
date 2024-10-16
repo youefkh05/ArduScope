@@ -219,3 +219,104 @@ fint32_t Read_Ohm(uint16_t Rout, uint8_t range)
 	return Rin;
 
 }
+
+void Select_Mux(uint8_t device, uint8_t range)
+{
+	
+	_delay_ms(100);
+	switch(device)
+	{
+		case '1':
+		{ //Ohm
+			switch(range)
+			{
+				case '1':
+				{
+					// Ohm range 1
+					digitalWrite( A_MUX_1, LOW);
+					digitalWrite( B_MUX_1, LOW);
+					
+				}
+				break;
+
+				case '2':
+				{
+					// Ohm range 2
+					digitalWrite( A_MUX_2, HIGH);
+					digitalWrite( B_MUX_2, LOW);
+					
+				}
+				break;
+
+				case '3':
+				{
+					// Ohm range 3
+					digitalWrite(  A_MUX_2,  LOW);
+					digitalWrite(  B_MUX_2, HIGH);
+					
+				}
+				break;
+			}
+		}
+		break;//for ohm device
+
+		case '2'://ammeter
+		{ 
+      //there is only one range
+      digitalWrite( A_MUX_1, LOW);
+      digitalWrite( B_MUX_1, LOW);
+      _delay_ms(100);
+			digitalWrite( A_MUX_2, LOW);
+      digitalWrite( B_MUX_2, LOW);
+
+		}
+		break;//for Ammeter device
+
+		case '3': //voltage
+		{
+			digitalWrite( A_MUX_1, LOW);
+      digitalWrite( B_MUX_1, LOW);
+			_delay_ms(100);
+			switch(range)
+			{
+				case '1':
+				{
+					// Volt range 1
+          digitalWrite( A_MUX_2, LOW);
+					digitalWrite( B_MUX_2, LOW);
+					
+				}
+				break;
+
+				case '2':
+				{
+					// Volt range 2
+          digitalWrite( A_MUX_2, HIGH);
+					digitalWrite( B_MUX_2, LOW);
+					
+				}
+				break;
+
+				case '3':
+				{
+					// Volt range 3
+					digitalWrite( A_MUX_2, LOW);
+					digitalWrite( B_MUX_2, HIGH);
+				}
+				break;
+
+				case '4':
+				{
+					// Volt range 4
+					digitalWrite( A_MUX_2, HIGH);
+					digitalWrite( B_MUX_2, HIGH);
+				}
+				break;
+
+			}
+		}
+		break;//for volt device
+	}
+  
+	return;
+}
