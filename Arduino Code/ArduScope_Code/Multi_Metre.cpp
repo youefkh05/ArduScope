@@ -9,7 +9,7 @@ void MM_Init(void)
   pinMode(B_MUX_2, OUTPUT);
 }
 
-float Read_Volt(uint16_t Vout, uint16_t Vtot, uint8_t Vrange, uint8_t mode)
+fint32_t Read_Volt(uint16_t Vout, uint16_t Vtot, uint8_t Vrange, uint8_t mode)
 {
 	//check if it didn't exceed the max range (positive or negative)
 	if(1003<=Vout || Vout<=206)
@@ -54,6 +54,9 @@ float Read_Volt(uint16_t Vout, uint16_t Vtot, uint8_t Vrange, uint8_t mode)
 		Vconst    =   2.545246;
 		break;
 
+    default:
+		//LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
+		break;
 	}
 	
 	switch(mode){
@@ -174,4 +177,45 @@ fint32_t Read_Amp(uint16_t Iout, uint16_t Itot, uint8_t Irange, uint8_t mode)
 
 	return I_input;
 	
+}
+
+fint32_t Read_Ohm(uint16_t Rout, uint8_t range)
+{
+	// range 1:10k 2:100k 3: 1M
+	if (range > '5' || range < '1')
+  {
+		return -1;
+	}
+
+	//Rin = (Rdivider *Rout)/(Max_Volt-Rout)
+  fint32_t Rdivider   =   -1;
+
+  fint32_t Max_Volt   =   1024.0;
+
+  switch(range)
+  {
+    case '1'://10k  Ohm
+		Rdivider     = 0.450;
+		break;
+
+		case '2'://100k Ohm
+		Rdivider     = 1.35;
+		break;
+
+		case '3'://1M   Ohm
+		Rdivider     = 10.0;
+		break;
+
+    default:
+		//LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
+		break;
+  }
+
+	fint32_t Rin  = 0;
+  
+	Rin=(Rdivider *Rout)/(Max_Volt-Rout);
+	_delay_ms(5);
+
+	return Rin;
+
 }

@@ -386,8 +386,8 @@ void display_ohm(uint8_t range, uint16_t volt)
 				LCD_ClearScreen();
 				LCD_HomeScreen();
 			}
-			if(volt>=1014){	// it is mega ohm
-				Rin=(0.01*volt)/(1024.0-volt);
+        if(volt>=1014){	// it is mega ohm
+          Rin=(0.01*volt)/(1024.0-volt);
 				LCD_Display_String((uint8_t*)"Resistor (MOhm)");
 				LCD_Display_Location(0,1);
 				LCD_Display_FloatNumber(Rin,3);

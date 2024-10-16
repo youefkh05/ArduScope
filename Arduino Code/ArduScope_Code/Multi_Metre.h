@@ -34,7 +34,7 @@ typedef float fint32_t;
 void MM_Init(void);
 fint32_t Read_Volt(uint16_t Vout, uint16_t Vtot, uint8_t Vrange, uint8_t mode);
 fint32_t Read_Amp(uint16_t Iout, uint16_t Itot, uint8_t Irange, uint8_t mode);
-void Read_Ohm(uint8_t range, uint16_t volt);
+fint32_t Read_Ohm(uint16_t Rout, uint8_t range);
 void Select_Mux(uint8_t device, uint8_t range);
 uint8_t Ask_To_Return(uint8_t return_key);
 
