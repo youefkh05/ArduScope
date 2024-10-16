@@ -21,6 +21,8 @@ float Read_Volt(uint16_t Vout, uint16_t Vtot, uint8_t Vrange, uint8_t mode)
   {
 		return 0.0;
 	}
+
+  // VIN_TO_V_OUT_MCU = Vdivider * VIN + Vconst
 	
 	fint32_t Vdivider;
 
@@ -101,5 +103,75 @@ float Read_Volt(uint16_t Vout, uint16_t Vtot, uint8_t Vrange, uint8_t mode)
 			return Val;
 		}
 	}   
+	
+}
+
+fint32_t Read_Amp(uint16_t Iout, uint16_t Itot, uint8_t Irange, uint8_t mode)
+{	
+	//check if it didn't exceed the max range (positive or negative)
+	if(810<=Iout || Iout<=200)
+  {
+		return 999.99;
+	}
+
+	//check if it was too small
+	if(406<=Iout && Iout <=414)
+  {
+		return 0.0;
+	}
+	
+	// I_TO_V_OUT_MCU = I_Slope * I_input + I_intercept
+
+	fint32_t I_input        =   -1;
+
+	fint32_t I_TO_V_OUT_MCU =   0;
+
+	switch(mode)
+  {
+		case '1': //AC
+			I_TO_V_OUT_MCU = (Itot * 5.0) / 1024.0;
+      break;
+
+		case '2': //DC
+			I_TO_V_OUT_MCU = (Iout * 5.0) / 1024.0;	
+      break;
+
+	}
+
+	fint32_t I_Slope     = -1;
+
+	fint32_t I_intercept = -1;
+
+	switch(Irange)
+	{
+		case '1'://2mA
+		I_Slope     = 0.86857;
+		I_intercept = 2.263;
+		break;
+
+		case '2'://20mA
+		I_Slope     = 0.09;
+		I_intercept = 2.31;
+		break;
+
+		case '3'://200mA
+		I_Slope     = 0.0124;
+		I_intercept = 2.01;
+		break;
+
+		case '4'://1A
+		I_Slope     = 2.517;
+		I_intercept = 2.012;
+		break;
+
+		default:
+		//LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
+		break;
+	}
+
+	I_input = (I_TO_V_OUT_MCU - I_intercept) / I_Slope;
+	_delay_ms(5);
+
+	return I_input;
 	
 }
