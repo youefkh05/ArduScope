@@ -40,9 +40,9 @@ uint8_t item_selected = 0; // which item in the menu is selected
 uint8_t item_sel_previous; // previous item - used in the menu screen to draw the item before the selected one
 uint8_t item_sel_next; // next item - used in the menu screen to draw next item after the selected one
 
-uint8_t device_selected = Voltmeter;
-uint8_t range_selected = range1;
-uint8_t mode_selected = DC_MODE;
+devices device_selected = Voltmeter;
+ranges  range_selected = range1;
+modes mode_selected = DC_MODE;
 
 fint32_t device_reading = 0;
 

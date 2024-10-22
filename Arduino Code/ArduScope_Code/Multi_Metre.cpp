@@ -3,13 +3,13 @@
 void MM_Init(void)
 {
   //setting the pins
-  pinMode(A_MUX_1, OUTPUT);
-  pinMode(A_MUX_2, OUTPUT);
-  pinMode(B_MUX_1, OUTPUT);
-  pinMode(B_MUX_2, OUTPUT);
+  pinMode(A_MUX_1_PIN, OUTPUT);
+  pinMode(A_MUX_2_PIN, OUTPUT);
+  pinMode(B_MUX_1_PIN, OUTPUT);
+  pinMode(B_MUX_2_PIN, OUTPUT);
 }
 
-fint32_t Read_Volt( uint8_t Vrange, uint8_t mode)
+fint32_t Read_Volt( ranges Vrange, modes mode)
 {
 
   // Vin = VSlope *  Vout + Vconst
@@ -115,7 +115,7 @@ fint32_t Read_Volt( uint8_t Vrange, uint8_t mode)
 	
 }
 
-fint32_t Read_Amp( uint8_t Irange, uint8_t mode)
+fint32_t Read_Amp( ranges Irange, modes mode)
 {	
 
   // Iin = ISlope *  Iout + Iconst
@@ -224,7 +224,7 @@ fint32_t Read_Amp( uint8_t Irange, uint8_t mode)
 	
 }
 
-fint32_t Read_Ohm(uint8_t range)
+fint32_t Read_Ohm( ranges range)
 {
 	// range 1:10k 2:100k 3: 1M
 	if (range >  5  || range <  1 )
@@ -293,7 +293,7 @@ fint32_t Read_Ohm(uint8_t range)
 
 }
 
-void Select_Mux(uint8_t device, uint8_t range)
+void Select_Mux(devices device, ranges range)
 {
 	
 	switch(device)
@@ -305,8 +305,8 @@ void Select_Mux(uint8_t device, uint8_t range)
 				case  range1  :
 				{
 					// Ohm range 1
-					digitalWrite( A_MUX_1, LOW);
-					digitalWrite( B_MUX_1, LOW);
+					digitalWrite( A_MUX_1_PIN, LOW);
+					digitalWrite( B_MUX_1_PIN, LOW);
 					
 				}
 				break;
@@ -314,8 +314,8 @@ void Select_Mux(uint8_t device, uint8_t range)
 				case  range2  :
 				{
 					// Ohm range 2
-					digitalWrite( A_MUX_1, HIGH);
-					digitalWrite( B_MUX_1, LOW);
+					digitalWrite( A_MUX_1_PIN, HIGH);
+					digitalWrite( B_MUX_1_PIN, LOW);
 					
 				}
 				break;
@@ -323,8 +323,8 @@ void Select_Mux(uint8_t device, uint8_t range)
 				case  range3  :
 				{
 					// Ohm range 3
-					digitalWrite(  A_MUX_1,  LOW);
-					digitalWrite(  B_MUX_1, HIGH);
+					digitalWrite(  A_MUX_1_PIN,  LOW);
+					digitalWrite(  B_MUX_1_PIN, HIGH);
 					
 				}
 				break;
@@ -336,8 +336,8 @@ void Select_Mux(uint8_t device, uint8_t range)
 		case  Ammeter ://ammeter
 		{ 
       //there is only one range
-      digitalWrite( A_MUX_1, LOW);
-      digitalWrite( B_MUX_1, LOW);
+      digitalWrite( A_MUX_1_PIN, LOW);
+      digitalWrite( B_MUX_1_PIN, LOW);
       
 
 		}
@@ -346,15 +346,15 @@ void Select_Mux(uint8_t device, uint8_t range)
 
 		case  Voltmeter : //voltage
 		{
-			digitalWrite( A_MUX_1, HIGH);
-      digitalWrite( B_MUX_1, LOW);
+			digitalWrite( A_MUX_1_PIN, HIGH);
+      digitalWrite( B_MUX_1_PIN, LOW);
 			switch(range)
 			{
 				case  range1 :
 				{
 					// Volt range 1
-          digitalWrite( A_MUX_2, LOW);
-					digitalWrite( B_MUX_2, LOW);
+          digitalWrite( A_MUX_2_PIN, LOW);
+					digitalWrite( B_MUX_2_PIN, LOW);
 					
 				}
 				break;
@@ -362,8 +362,8 @@ void Select_Mux(uint8_t device, uint8_t range)
 				case  range2 :
 				{
 					// Volt range 2
-          digitalWrite( A_MUX_2, HIGH);
-					digitalWrite( B_MUX_2, LOW);
+          digitalWrite( A_MUX_2_PIN, HIGH);
+					digitalWrite( B_MUX_2_PIN, LOW);
 					
 				}
 				break;
@@ -371,16 +371,16 @@ void Select_Mux(uint8_t device, uint8_t range)
 				case  range3 :
 				{
 					// Volt range 3
-					digitalWrite( A_MUX_2, LOW);
-					digitalWrite( B_MUX_2, HIGH);
+					digitalWrite( A_MUX_2_PIN, LOW);
+					digitalWrite( B_MUX_2_PIN, HIGH);
 				}
 				break;
 
 				case  range4 :
 				{
 					// Volt range 4
-					digitalWrite( A_MUX_2, HIGH);
-					digitalWrite( B_MUX_2, HIGH);
+					digitalWrite( A_MUX_2_PIN, HIGH);
+					digitalWrite( B_MUX_2_PIN, HIGH);
 				}
 				break;
 
