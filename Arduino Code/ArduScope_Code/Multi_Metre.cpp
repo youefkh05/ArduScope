@@ -1,5 +1,7 @@
 #include "Multi_Metre.h"
 
+#define DC_BIAS_VAL   (450)
+
 void MM_Init(void)
 {
   //setting the pins
@@ -11,7 +13,6 @@ void MM_Init(void)
 
 fint32_t Read_Volt( ranges Vrange, modes mode)
 {
-
   // Vin = VSlope *  Vout + Vconst
 	
   int Vout;
@@ -66,7 +67,7 @@ fint32_t Read_Volt( ranges Vrange, modes mode)
 
     case AC_MODE:
 
-      Vout=analogRead(OUT_AC_PIN);
+      Vout=analogRead(OUT_AC_PIN)-analogRead(OUT_DC_PIN)+DC_BIAS_VAL;
 
       switch(Vrange)
       {
@@ -172,7 +173,7 @@ fint32_t Read_Amp( ranges Irange, modes mode)
 
     case AC_MODE:
 
-      Iout=analogRead(OUT_AC_PIN);
+      Iout=analogRead(OUT_AC_PIN)-analogRead(OUT_DC_PIN)+DC_BIAS_VAL;
 
       switch(Irange)
       {

@@ -2,7 +2,7 @@
 #include "Multi_Metre.h"
 
 ranges range=range2;
-modes mode=DC_MODE;
+modes mode=AC_MODE;
 devices device=Voltmeter;
 
 void setup() {
