@@ -1,9 +1,9 @@
 
-#include "Multi_Metre.h"
+#include "Multi_Metre_Sig.h"
 
-ranges range=range3;
+ranges range=range2;
 modes mode=DC_MODE;
-devices device=Ammeter;
+devices device=Voltmeter;
 
 void setup() {
   // Set the pins as output
@@ -14,8 +14,8 @@ void setup() {
 
 void loop()
 {  
-    fint32_t x=Read_Amp(range, mode);
-    Serial.print("Amp = ");
+    fint32_t x=Read_Volt(range, mode);
+    Serial.print("Volt = ");
     Serial.println(x);
     delay(100);
 }

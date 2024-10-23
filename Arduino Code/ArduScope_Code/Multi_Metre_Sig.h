@@ -1,12 +1,12 @@
 /*
- * MULTI_METRE.h
+ * MULTI_METRE_SIG.h
  *
  * Created: 10/15/2024 6:00 PM
  *  Author: Yousef
  */
 
-#ifndef MULTI_METRE_H
-#define MULTI_METRE_H
+#ifndef MULTI_METRE_SIG_H
+#define MULTI_METRE_SIG_H
 
 /*  Include */
 #include <Arduino.h>
@@ -19,9 +19,12 @@
 
 // Define an enum for devices
 enum devices {
-  Ohmeter = 1,   
-  Ammeter = 2,   
-  Voltmeter = 3  
+  Ohmeter     = 1,   
+  Ammeter     = 2,   
+  Voltmeter   = 3,
+  Square      = 4, 
+  Tri         = 5, 
+  Sin         = 6, 
 };
 
 // Define an enum for ranges
@@ -65,13 +68,13 @@ fint32_t Read_Amp( ranges Irange, modes mode);
 //Range:10k, 100k, 1M
 fint32_t Read_Ohm( ranges range);
 
-//Devices: Ohmeter, Ammeter, Voltmeter  Ranges: 1, 2, 3, 4
-void Select_Mux(devices device, ranges range);
+//Devices: Ohmeter, Ammeter, Voltmeter, Square, Tri, Sin    Ranges: 1, 2, 3, 4
+void Select_Mux( devices device, ranges range);
 
-uint8_t Ask_To_Return(uint8_t return_key);
-
-
+uint8_t Ask_To_Return( uint8_t return_key);
 
 
 
-#endif /* MULTI_METRE_H*/
+
+
+#endif /* MULTI_METRE__SIGH*/
