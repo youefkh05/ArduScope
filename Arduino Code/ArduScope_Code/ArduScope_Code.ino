@@ -3,7 +3,7 @@
 
 ranges range=range2;
 modes mode=DC_MODE;
-devices device=Voltmeter;
+devices device=Tri;
 
 void setup() {
   // Set the pins as output
@@ -13,9 +13,10 @@ void setup() {
 }
 
 void loop()
-{  
+{  /*
     fint32_t x=Read_Volt(range, mode);
     Serial.print("Volt = ");
     Serial.println(x);
     delay(100);
+    */
 }

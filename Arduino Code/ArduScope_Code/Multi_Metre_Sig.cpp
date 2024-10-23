@@ -390,9 +390,8 @@ void Select_Mux(devices device, ranges range)
     case  Square : //Square
 		{
 			
-      digitalWrite( B_MUX_2_PIN, HIGH);
-      digitalWrite( B_MUX_2_PIN, HIGH);
-      digitalWrite( B_MUX_2_PIN, HIGH);
+      digitalWrite( A_MUX_1_PIN, LOW);
+      digitalWrite( B_MUX_1_PIN, LOW);
 
 		}
     _delay_ms(2);
@@ -401,9 +400,8 @@ void Select_Mux(devices device, ranges range)
     case  Tri  : //Tri 
 		{
 			
-      digitalWrite( B_MUX_2_PIN, HIGH);
-      digitalWrite( B_MUX_2_PIN, HIGH);
-      digitalWrite( B_MUX_2_PIN, HIGH);
+      digitalWrite( A_MUX_1_PIN, HIGH);
+      digitalWrite( B_MUX_1_PIN, LOW);
 
 		}
     _delay_ms(2);
@@ -412,9 +410,9 @@ void Select_Mux(devices device, ranges range)
     case  Sin  : //Sin 
 		{
 			
-      digitalWrite( B_MUX_2_PIN, HIGH);
-      digitalWrite( B_MUX_2_PIN, HIGH);
-      digitalWrite( B_MUX_2_PIN, HIGH);
+      digitalWrite( A_MUX_1_PIN, LOW);
+      digitalWrite( B_MUX_1_PIN, HIGH);
+
 
 		}
     _delay_ms(2);
