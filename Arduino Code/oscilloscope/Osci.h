@@ -14,7 +14,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 //#include "Adafruit_SH1106.h"            // https://github.com/wonho-maker/Adafruit_SH1106
-#include <EEPROM.h>
+//#include <EEPROM.h>
 
 //OLED Definitions
 #define SCREEN_WIDTH 128                // OLED display width
