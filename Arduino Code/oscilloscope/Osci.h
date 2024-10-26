@@ -23,92 +23,51 @@
 #define MIN_TRIG_SWING 5                // minimum trigger swing.(Display "Unsync" if swing smaller than this value
 #define OLED_RESET     -1      // Reset pin # (or -1 if sharing Arduino reset pin)
 
-void setConditions(void);
+//Pins Number
+#define   Osci_Input_Bot    (2)
+#define   Select_Bot        (8)
+#define   Up_Bot            (9)
+#define   Down_Bot          (10)
+#define   Hold_Bot          (11)
+#define   Osci_In           (A0)
 
-void writeCommonImage(void);
+void Osci_Init(void);
 
-void readWave(void);
+void Osci_Run(void);
 
-void dataAnalize(void);
+static void setConditions(void);
 
-void freqDuty(void);
+static void writeCommonImage(void);
 
-int sum3(int k);
+static void readWave(void);
 
-void startScreen(void);
+static void dataAnalize(void);
 
-void dispHold(void);
+static void freqDuty(void);
 
-void dispInf(void);
+static int sum3(int k);
 
-void plotData(void);
+static void startScreen(void);
 
-void saveEEPROM(void);
+static void dispHold(void);
 
-void loadEEPROM(void);
+static void dispInf(void);
 
-void auxFunctions(void);
+static void plotData(void);
 
-void uuPinOutputLow(unsigned int d, unsigned int a);
+static void saveEEPROM(void);
 
-void pin2IRQ(void);
+static void loadEEPROM(void);
 
+static void auxFunctions(void);
 
+static void uuPinOutputLow(unsigned int d, unsigned int a);
 
-
-
-
-
-
-
-
-
-
-
-
-
-//input
-#define   OUT_DC_PIN    (A0)
-#define   OUT_AC_PIN    (A1)
-#define   OUT_RIN_PIN   (A2)
-
-// Define an enum for devices
-enum devices {
-  Ohmeter     = 1,   
-  Ammeter     = 2,   
-  Voltmeter   = 3,
-  Square      = 4, 
-  Tri         = 5, 
-  Sin         = 6, 
-};
-
-// Define an enum for ranges
-enum ranges{
-  range1  = 1,
-  range2  = 2,
-  range3  = 3,
-  range4  = 4,
-};
+static void pin2IRQ(void);
 
 
-// Define an enum for modes
-enum modes{
-  AC_MODE = 1,
-  DC_MODE = 2,
-};
 
-
-//MUX1
-#define   A_MUX_1_PIN       (5)
-#define   B_MUX_1_PIN       (4)
-
-//MUX2
-#define   A_MUX_2_PIN       (3)
-#define   B_MUX_2_PIN       (2)
-
-
-typedef float fint32_t;
-
+/*
 
 
 // Function Prototypes
@@ -128,7 +87,7 @@ void Select_Mux( devices device, ranges range);
 
 uint8_t Ask_To_Return( uint8_t return_key);
 
-
+*/
 
 
 

@@ -4,6 +4,15 @@
 Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);   // device name is oled
 //Adafruit_SH1106 oled(OLED_RESET);        // use this when SH1106
 
+/*
+// Range name table (those are stored in flash memory)
+
+const char * const vstring_table[] PROGMEM = { "50V", "20V", "10V", "5V", "2V", "1V", "0.5V", "0.2V"};
+
+const char * const hstring_table[] PROGMEM = {"200ms", "100ms", " 50ms", " 20ms", " 10ms", "  5ms", "  2ms", "  1ms", "500us", "200us"};
+const PROGMEM float hRangeValue[] = { 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.5e-3, 0.2e-3}; // horizontal range value in second. ( = 25pix on screen)
+*/
+
 // Range name table (those are stored in flash memory)
 const char vRangeName[10][5] PROGMEM = {"A50V", "A 5V", " 50V", " 20V", " 10V", "  5V", "  2V", "  1V", "0.5V", "0.2V"}; // Vertical display character (number of characters including \ 0 is required)
 const char * const vstring_table[] PROGMEM = {vRangeName[0], vRangeName[1], vRangeName[2], vRangeName[3], vRangeName[4], vRangeName[5], vRangeName[6], vRangeName[7], vRangeName[8], vRangeName[9]};
@@ -42,7 +51,53 @@ int att10x;                    // 10x attenetor ON (effective when 1)
 float waveFreq;                // frequency (Hz)
 float waveDuty;                // duty ratio (%)
 
-void setConditions() {           // measuring condition setting
+void Osci_Init(void)
+{
+  pinMode(Osci_Input_Bot, INPUT_PULLUP);             // button pussed interrupt (int.0 IRQ)
+  pinMode(Select_Bot, INPUT_PULLUP);          // Select button
+  pinMode(Up_Bot , INPUT_PULLUP);             // Up
+  pinMode(Down_Bot, INPUT_PULLUP);            // Down
+  pinMode(Hold_Bot, INPUT_PULLUP);            // Hold
+  //pinMode(12, INPUT);                   // 1/10 attenuator(Off=High-Z, Enable=Output Low)
+
+
+  oled.begin(SSD1306_SWITCHCAPVCC, 0x3D);  // select 3C or 3D (set your OLED I2C address)
+  //oled.begin(SH1106_SWITCHCAPVCC, 0x3D);  // use this when SH1106 
+
+  auxFunctions();                       // Voltage measure (never return)
+  loadEEPROM();                         // read last settings from EEPROM
+  analogReference(INTERNAL);            // ADC full scale = 1.1V
+  attachInterrupt(0, pin2IRQ, FALLING); // activate IRQ at falling edge mode
+
+   //vRange=3;           // V-range number 0:A50V,  1:A 5V,  2:50V,  3:20V,  4:10V,  5:5V,  6:2V,  7:1V,  8:0.5V,  9:0.2V
+   //hRange=3;           // H-range nubmer 0:200ms, 1:100ms, 2:50ms, 3:20ms, 4:10ms, 5:5ms, 6;2ms, 7:1ms, 8:500us, 9;200us
+   //trigD=1;            // trigger slope flag,     0:positive 1:negative
+   //scopeP=1;
+}
+
+
+void Osci_Run(void) {
+  startScreen(); // display start message
+  while(1){
+    setConditions();                      // set measurment conditions
+    readWave();                           // read wave form and store into buffer memory
+    setConditions();                      // set measurment conditions again (reflect change during measure)
+    dataAnalize();                        // analize data
+    writeCommonImage();                   // write fixed screen image (2.6ms)
+    plotData();                           // plot waveform (10-18ms)
+    dispInf();                            // display information (6.5-8.5ms)
+    oled.display();                       // send screen buffer to OLED (37ms)
+    saveEEPROM();                       // save settings to EEPROM if necessary
+    while (hold == true) {                // wait if Hold flag ON
+      dispHold();
+      delay(10);                          // loop cycle speed = 60-470ms (buffer size = 200)
+    }       
+                                  
+  }                        
+   
+}
+
+static void setConditions() {           // measuring condition setting
   // get range name from PROGMEM
   strcpy_P(hScale, (char*)pgm_read_word(&(hstring_table[hRange])));  // H range name
   strcpy_P(vScale, (char*)pgm_read_word(&(vstring_table[vRange])));  // V range name
@@ -123,7 +178,7 @@ void setConditions() {           // measuring condition setting
   }
 }
 
-void writeCommonImage() {                 // Common screen image drawing
+static void writeCommonImage() {                 // Common screen image drawing
   oled.clearDisplay();                    // erase all(0.4ms)
   oled.setTextColor(WHITE);               // write in white character
   oled.setCursor(85, 0);                  // Start at top-left corner
@@ -158,12 +213,12 @@ void writeCommonImage() {                 // Common screen image drawing
   }
 }
 
-void readWave() {                            // Record waveform to memory array
+static void readWave() {                            // Record waveform to memory array
   if (att10x == 1) {                         // if 1/10 attenuator required
-    pinMode(12, OUTPUT);                     // assign attenuator controle pin to OUTPUT,
-    digitalWrite(12, LOW);                   // and output LOW (output 0V)
+    //pinMode(12, OUTPUT);                     // assign attenuator controle pin to OUTPUT,
+    //digitalWrite(12, LOW);                   // and output LOW (output 0V)
   } else {                                   // if not required
-    pinMode(12, INPUT);                      // assign the pin input (Hi-z)
+    //pinMode(12, INPUT);                      // assign the pin input (Hi-z)
   }
   switchPushed = false;                      // Clear switch operation flag
 
@@ -173,7 +228,7 @@ void readWave() {                            // Record waveform to memory array
         ADCSRA = ADCSRA & 0xf8;              // clear bottom 3bit
         ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
         for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(0);       // read and save approx 112us
+          waveBuff[i] = analogRead(Osci_In);       // read and save approx 112us
           delayMicroseconds(7888);           // timing adjustment
           if (switchPushed == true) {        // if any switch touched
             switchPushed = false;
@@ -187,7 +242,7 @@ void readWave() {                            // Record waveform to memory array
         ADCSRA = ADCSRA & 0xf8;              // clear bottom 3bit
         ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
         for (int i = 0; i < REC_LENG; i++) {  // up to rec buffer size
-          waveBuff[i] = analogRead(0);       // read and save approx 112us
+          waveBuff[i] = analogRead(Osci_In);       // read and save approx 112us
           // delayMicroseconds(3888);           // timing adjustmet
           delayMicroseconds(3860);           // timing adjustmet tuned
           if (switchPushed == true) {        // if any switch touched
@@ -202,7 +257,7 @@ void readWave() {                            // Record waveform to memory array
         ADCSRA = ADCSRA & 0xf8;              // clear bottom 3bit
         ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
         for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(0);       // read and save approx 112us
+          waveBuff[i] = analogRead(Osci_In);       // read and save approx 112us
           // delayMicroseconds(1888);           // timing adjustmet
           delayMicroseconds(1880);           // timing adjustmet tuned
 
@@ -217,7 +272,7 @@ void readWave() {                            // Record waveform to memory array
         ADCSRA = ADCSRA & 0xf8;              // clear bottom 3bit
         ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
         for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(0);       // read and save approx 112us
+          waveBuff[i] = analogRead(Osci_In);       // read and save approx 112us
           // delayMicroseconds(688);            // timing adjustmet
           delayMicroseconds(686);            // timing adjustmet tuned
           if (switchPushed == true) {        // if any switch touched
@@ -231,7 +286,7 @@ void readWave() {                            // Record waveform to memory array
         ADCSRA = ADCSRA & 0xf8;              // clear bottom 3bit
         ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
         for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(0);       // read and save approx 112us
+          waveBuff[i] = analogRead(Osci_In);       // read and save approx 112us
           // delayMicroseconds(288);            // timing adjustmet
           delayMicroseconds(287);            // timing adjustmet tuned
           if (switchPushed == true) {        // if any switch touched
@@ -245,7 +300,7 @@ void readWave() {                            // Record waveform to memory array
         ADCSRA = ADCSRA & 0xf8;              // clear bottom 3bit
         ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
         for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(0);       // read and save approx 112μs
+          waveBuff[i] = analogRead(Osci_In);       // read and save approx 112μs
           // delayMicroseconds(88);             // timing adjustmet
           delayMicroseconds(87);             // timing adjustmet tuned
           if (switchPushed == true) {        // if any switch touched
@@ -259,7 +314,7 @@ void readWave() {                            // Record waveform to memory array
         ADCSRA = ADCSRA & 0xf8;              // clear bottom 3bit
         ADCSRA = ADCSRA | 0x06;              // dividing ratio = 64 (0x1=2, 0x2=4, 0x3=8, 0x4=16, 0x5=32, 0x6=64, 0x7=128)
         for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(0);       // read and save approx 56us
+          waveBuff[i] = analogRead(Osci_In);       // read and save approx 56us
           // delayMicroseconds(24);             // timing adjustmet
           delayMicroseconds(23);             // timing adjustmet tuned
         }
@@ -270,7 +325,7 @@ void readWave() {                            // Record waveform to memory array
         ADCSRA = ADCSRA & 0xf8;              // clear bottom 3bit
         ADCSRA = ADCSRA | 0x05;              // dividing ratio = 16 (0x1=2, 0x2=4, 0x3=8, 0x4=16, 0x5=32, 0x6=64, 0x7=128)
         for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(0);       // read and save approx 28us
+          waveBuff[i] = analogRead(Osci_In);       // read and save approx 28us
           // delayMicroseconds(12);             // timing adjustmet
           delayMicroseconds(10);             // timing adjustmet tuned
         }
@@ -281,7 +336,7 @@ void readWave() {                            // Record waveform to memory array
         ADCSRA = ADCSRA & 0xf8;              // clear bottom 3bit
         ADCSRA = ADCSRA | 0x04;              // dividing ratio = 16(0x1=2, 0x2=4, 0x3=8, 0x4=16, 0x5=32, 0x6=64, 0x7=128)
         for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(0);       // read and save approx 16us
+          waveBuff[i] = analogRead(Osci_In);       // read and save approx 16us
           delayMicroseconds(4);              // timing adjustmet
           // time fine adjustment 0.0625 x 8 = 0.5us（nop=0.0625us @16MHz)
           asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");
@@ -293,7 +348,7 @@ void readWave() {                            // Record waveform to memory array
         ADCSRA = ADCSRA & 0xf8;              // clear bottom 3bit
         ADCSRA = ADCSRA | 0x02;              // dividing ratio = 4(0x1=2, 0x2=4, 0x3=8, 0x4=16, 0x5=32, 0x6=64, 0x7=128)
         for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(0);       // read and save approx 6us
+          waveBuff[i] = analogRead(Osci_In);       // read and save approx 6us
           // time fine adjustment 0.0625 * 20 = 1.25us (nop=0.0625us @16MHz)
           asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");
           asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");
@@ -303,7 +358,7 @@ void readWave() {                            // Record waveform to memory array
   }
 }
 
-void dataAnalize() {                       // get various information from wave form
+static void dataAnalize() {                       // get various information from wave form
   int d;
   long sum = 0;
 
@@ -371,7 +426,7 @@ void dataAnalize() {                       // get various information from wave 
   freqDuty();
 }
 
-void freqDuty() {                               // detect frequency and duty cycle value from waveform data
+static void freqDuty() {                               // detect frequency and duty cycle value from waveform data
   int swingCenter;                              // center of wave (half of p-p)
   float p0 = 0;                                 // 1-st posi edge
   float p1 = 0;                                 // total length of cycles
@@ -424,35 +479,35 @@ void freqDuty() {                               // detect frequency and duty cyc
   waveDuty = 100.0 * pWidth / pPeriod;                                      // duty ratio
 }
 
-int sum3(int k) {       // Sum of before and after and own value
+static int sum3(int k) {       // Sum of before and after and own value
   int m = waveBuff[k - 1] + waveBuff[k] + waveBuff[k + 1];
   return m;
 }
 
-void startScreen() {                      // Staru up screen
+static void startScreen() {                      // Staru up screen
   oled.clearDisplay();
   oled.setTextSize(1);                    // at double size character
   oled.setTextColor(WHITE);
-  oled.setCursor(55, 0);
-  oled.println(F("Mini"));  
+  oled.setCursor(40, 0);
+  oled.println(F("ArduScope"));  
   oled.setCursor(30, 20);
   oled.println(F("Oscilloscope")); 
   oled.setCursor(55, 42);            
-  oled.println(F("v1.1"));                
+  oled.println(F(";)"));                
   oled.display();                         
   delay(1500);
   oled.clearDisplay();
   oled.setTextSize(1);                    // After this, standard font size
 }
 
-void dispHold() {                         // display "Hold"
+static void dispHold() {                         // display "Hold"
   oled.fillRect(42, 11, 24, 8, BLACK);    // black paint 4 characters
   oled.setCursor(42, 11);
   oled.print(F("Hold"));                  // Hold
   oled.display();                         //
 }
 
-void dispInf() {                          // Display of various information
+static void dispInf() {                          // Display of various information
   float voltage;
   // display vertical sensitivity
   oled.setCursor(2, 0);                   // around top left
@@ -556,7 +611,7 @@ void dispInf() {                          // Display of various information
   }
 }
 
-void plotData() {                    // plot wave form on OLED
+static void plotData() {                    // plot wave form on OLED
   long y1, y2;
   for (int x = 0; x <= 98; x++) {
     y1 = map(waveBuff[x + trigP - 50], rangeMin, rangeMax, 63, 9); // convert to plot address
@@ -567,7 +622,7 @@ void plotData() {                    // plot wave form on OLED
   }
 }
 
-void saveEEPROM() {                    // Save the setting value in EEPROM after waiting a while after the button operation.
+static void saveEEPROM() {                    // Save the setting value in EEPROM after waiting a while after the button operation.
   if (saveTimer > 0) {                 // If the timer value is positive,
     saveTimer = saveTimer - timeExec;  // Timer subtraction
     if (saveTimer < 0) {               // if time up
@@ -579,10 +634,10 @@ void saveEEPROM() {                    // Save the setting value in EEPROM after
   }
 }
 
-void loadEEPROM() {                    // Read setting values from EEPROM (abnormal values will be corrected to default)
+static void loadEEPROM() {                    // Read setting values from EEPROM (abnormal values will be corrected to default)
   int x;
   x = EEPROM.read(0);                  // vRange
-  if ((x < 0) || (9 < x)) {            // if out side 0-9
+  if ((x < 0) || (7 < x)) {            // if out side 0-9
     x = 3;                             // default value
   }
   vRange = x;
@@ -604,10 +659,10 @@ void loadEEPROM() {                    // Read setting values from EEPROM (abnor
   scopeP = x;
 }
 
-void auxFunctions() {                       // voltage meter function
+static void auxFunctions() {                       // voltage meter function
   float voltage;
   long x;
-  if (digitalRead(8) == LOW) {              // if SELECT button pushed, measure battery voltage
+  if (digitalRead(Select_Bot) == LOW) {              // if SELECT button pushed, measure battery voltage
     analogReference(DEFAULT);               // ADC full scale set to Vcc
     while (1) {                             // do forever
       x = 0;
@@ -629,12 +684,12 @@ void auxFunctions() {                       // voltage meter function
       delay(150);
     }
   }
-  if (digitalRead(9) == LOW) {              // if UP button pushed, 5V range
+  if (digitalRead(Up_Bot) == LOW) {              // if UP button pushed, 5V range
     analogReference(INTERNAL);
-    pinMode(12, INPUT);                     // Set the attenuator control pin to Hi-z (use as input)
+    //pinMode(12, INPUT);                     // Set the attenuator control pin to Hi-z (use as input)
     while (1) {                             // do forever,
-      digitalWrite(13, HIGH);               // flash LED
-      voltage = analogRead(0) * lsb5V;      // measure voltage
+      
+      voltage = analogRead(Osci_In) * lsb5V;      // measure voltage
       oled.clearDisplay();                  // erase screen (0.4ms)
       oled.setTextColor(WHITE);             // write in white character
       oled.setCursor(26, 16);               //
@@ -646,17 +701,16 @@ void auxFunctions() {                       // voltage meter function
       oled.print(chrBuff);
       oled.println(F("V"));
       oled.display();
-      digitalWrite(13, LOW);                // stop LED flash
       delay(150);
     }
   }
-  if (digitalRead(10) == LOW) {             // if DOWN botton pushed, 50V range
+  if (digitalRead(Down_Bot) == LOW) {             // if DOWN botton pushed, 50V range
     analogReference(INTERNAL);
-    pinMode(12, OUTPUT);                    // Set the attenuator control pin to OUTPUT
-    digitalWrite(12, LOW);                  // output LOW
+    //pinMode(12, OUTPUT);                    // Set the attenuator control pin to OUTPUT
+    //digitalWrite(12, LOW);                  // output LOW
     while (1) {                             // do forever
-      digitalWrite(13, HIGH);               // flush LED
-      voltage = analogRead(0) * lsb50V;     // measure voltage
+      //digitalWrite(13, HIGH);               // flush LED
+      voltage = analogRead(Osci_In) * lsb50V;     // measure voltage
       oled.clearDisplay();                  // erase screen (0.4ms)
       oled.setTextColor(WHITE);             // write in white character
       oled.setCursor(26, 16);               //
@@ -668,13 +722,13 @@ void auxFunctions() {                       // voltage meter function
       oled.print(chrBuff);
       oled.println(F("V"));
       oled.display();
-      digitalWrite(13, LOW);                // stop LED flash
+      //digitalWrite(13, LOW);                // stop LED flash
       delay(150);
     }
   }
 }
 
-void uuPinOutputLow(unsigned int d, unsigned int a) { // 指定ピンを出力、LOWに設定
+static void uuPinOutputLow(unsigned int d, unsigned int a) { // 指定ピンを出力、LOWに設定
   // PORTx =0, DDRx=1
   unsigned int x;
   x = d & 0x00FF; PORTD &= ~x; DDRD |= x;
@@ -682,7 +736,7 @@ void uuPinOutputLow(unsigned int d, unsigned int a) { // 指定ピンを出力�
   x = a & 0x003F; PORTC &= ~x; DDRC |= x;
 }
 
-void pin2IRQ() {                   // Pin2(int.0) interrupr handler
+static void pin2IRQ() {                   // Pin2(int.0) interrupr handler
   // Pin8,9,10,11 buttons are bundled with diodes and connected to Pin2.
   // So, if any button is pressed, this routine will start.
   int x;                           // Port information holding variable
@@ -702,8 +756,8 @@ void pin2IRQ() {                   // Pin2(int.0) interrupr handler
   if ((x & 0x02) == 0) {           // if UP button(Pin9) pusshed, and
     if (scopeP == 0) {             // scoped vertical range
       vRange++;                    // V-range up !
-      if (vRange > 9) {            // if upper limit
-        vRange = 9;                // stay as is
+      if (vRange > 7) {            // if upper limit
+        vRange = 7;                // stay as is
       }
     }
     if (scopeP == 1) {             // if scoped hrizontal range
@@ -746,427 +800,3 @@ void pin2IRQ() {                   // Pin2(int.0) interrupr handler
 
 
 
-
-
-
-#define DC_BIAS_VAL   (450)
-
-void MM_Init(void)
-{
-  //setting the pins
-  pinMode(A_MUX_1_PIN, OUTPUT);
-  pinMode(A_MUX_2_PIN, OUTPUT);
-  pinMode(B_MUX_1_PIN, OUTPUT);
-  pinMode(B_MUX_2_PIN, OUTPUT);
-}
-
-fint32_t Read_Volt( ranges Vrange, modes mode)
-{
-  // Vin = VSlope *  Vout + Vconst
-	
-  int Vout;
-
-  Vout=-1;
-
-  fint32_t Vin;
-
-	Vin = -1;
-
-	fint32_t V_Slope;
-
-	V_Slope = -1;
-
-	fint32_t Vconst;
-
-	Vconst  = -1;
-  
-  switch(mode)
-  { 
-    case DC_MODE:
-
-      Vout=analogRead(OUT_DC_PIN);
-      
-      switch(Vrange)
-      {
-        case  range1 ://300mV
-        V_Slope   =   0.139574;
-        Vconst    =   -0.28634;
-        break;
-
-        case  range2 ://3V
-        V_Slope   =   1.394078;
-        Vconst    =   -2.96428;
-        break;
-
-        case  range3 ://30V
-        V_Slope  =   0.0587325;
-        Vconst    =   2.5144325;
-        break;
-
-        case  range4 ://400V
-        V_Slope  =   0.0047988;
-        Vconst    =   2.545246;
-        break;
-
-        default:
-        //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
-        break;
-      }
-    break;
-
-    case AC_MODE:
-
-      Vout=analogRead(OUT_AC_PIN)-analogRead(OUT_DC_PIN)+DC_BIAS_VAL;
-
-      switch(Vrange)
-      {
-        case  range1 ://300mV
-        V_Slope   =   0.1664;
-        Vconst    =   -0.35624;
-        break;
-
-        case  range2 ://3V
-        V_Slope   =   1.634254;
-        Vconst    =   -3.683854;
-        break;
-
-        case  range3 ://30V
-        V_Slope  =   0.0587325;
-        Vconst    =   2.5144325;
-        break;
-
-        case  range4 ://400V
-        V_Slope  =   0.0047988;
-        Vconst    =   2.545246;
-        break;
-
-        default:
-        //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
-        break;
-      }
-    break;  
-  }
-
-  //check if it didn t exceed the max range (positive or negative)
-	if(880<= Vout ||  Vout<=206)
-  {
-		return -1.99;
-	}
-    
-  //make it in volt and float  
-  fint32_t  Vf =  Vout*5.0/1024.0;
-
-  //Serial.print("Vf= ");
-  //Serial.println(Vf);
-
-  Vin = V_Slope*  Vf + Vconst; //equation
-      
-  return Vin;  
-	
-}
-
-fint32_t Read_Amp( ranges Irange, modes mode)
-{	
-
-  // Iin = ISlope *  Iout + Iconst
-	
-  int Iout;
-
-  Iout=-1;
-
-  fint32_t Iin;
-
-	Iin = -1;
-
-	fint32_t I_Slope;
-
-	I_Slope = -1;
-
-	fint32_t Iconst;
-
-	Iconst  = -1;
-
-   switch(mode)
-  { 
-    case DC_MODE:
-
-      Iout=analogRead(OUT_DC_PIN);
-      
-      switch(Irange)
-      {
-        case  range1 ://2mAmp
-        I_Slope   =   0.139574;
-        Iconst    =   -0.28634;
-        break;
-
-        case  range2 ://20mAmp
-        I_Slope   =   83.8305;
-        Iconst    =   -173.84642;
-        break;
-
-        case  range3 ://200mAmp
-        I_Slope   =   83.8305;
-        Iconst    =   -173.84642;
-        break;
-
-        case  range4 ://1Amp
-        I_Slope  =   0.0047988;
-        Iconst    =   2.545246;
-        break;
-
-        default:
-        //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
-        break;
-      }
-    break;
-
-    case AC_MODE:
-
-      Iout=analogRead(OUT_AC_PIN)-analogRead(OUT_DC_PIN)+DC_BIAS_VAL;
-
-      switch(Irange)
-      {
-        case  range1 ://2mAmp
-        I_Slope   =   83.8305;
-        Iconst    =   -173.84642;
-        break;
-
-        case  range2 ://20mAmp
-        I_Slope   =   1.634254;
-        Iconst    =   -3.683854;
-        break;
-
-        case  range3 ://200mAmp
-        I_Slope   =   90.91;
-        Iconst    =   -195.4545;
-        break;
-
-        case  range4 ://1Amp
-        I_Slope  =   0.0047988;
-        Iconst    =   2.545246;
-        break;
-
-        default:
-        //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
-        break;
-      }
-    break;  
-  }
-
-  //Serial.print("Iout= ");
-  //Serial.println(Iout);
-
-  //check if it didn t exceed the max range (positive or negative)
-	if(1000<= Iout ||  Iout<=206)
-  {
-		return -1.99;
-	}
-    
-  //make it in volt and float  
-  fint32_t  If =  Iout*5.0/1024.0;
-
-  //Serial.print("If= ");
-  //Serial.println(If);
-
-  Iin = I_Slope*  If + Iconst; //equation
-      
-  return Iin;  
-	
-}
-
-fint32_t Read_Ohm( ranges range)
-{
-	// range 1:10k 2:100k 3: 1M
-	if (range >  5  || range <  1 )
-  {
-		return -1;
-	}
-
-	//Rin = m1* Rout^2 +m2* Rout + Rconst
-
-  int Rout=analogRead(OUT_RIN_PIN);
-
-  fint32_t Rin  = 0;
-
-  fint32_t m1       =   -1;
-
-  fint32_t m2       =   -1;
-
-  fint32_t Rconst   =   -1;
-
-  switch(range)
-  {
-    case  range1 ://10k  Ohm
-
-		  m1      =   7.408666;
-
-      m2      =   -58.75646;
-
-      Rconst  =   118.38925;
-
-		break;
-
-		case  range2 ://100k Ohm
-	
-		m1      =   874.13015;
-
-    m2      =   -8139.9605;
-
-    Rconst  =   18961.3339;
-
-		break;
-
-		case  range3 ://1M   Ohm
-		
-		m1      =   17433.97271;
-
-    m2      =   -165272.9212;
-
-    Rconst  =   391784.0959;
-
-		break;
-
-    default:
-		//LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
-		break;
-  }
-
-  //make it in volt and float  
-  fint32_t  Rf =  Rout*5.0/1024.0;
-
-  //Serial.print("Rf= ");
-  //Serial.println(Rf);
-  
-	Rin=m1* Rf* Rf + m2* Rf + Rconst;
-
-	return Rin;
-
-}
-
-void Select_Mux(devices device, ranges range)
-{
-	
-	switch(device)
-	{
-		case  Ohmeter :
-		{ //Ohm
-			switch(range)
-			{
-				case  range1  :
-				{
-					// Ohm range 1
-					digitalWrite( A_MUX_1_PIN, LOW);
-					digitalWrite( B_MUX_1_PIN, LOW);
-					
-				}
-				break;
-
-				case  range2  :
-				{
-					// Ohm range 2
-					digitalWrite( A_MUX_1_PIN, HIGH);
-					digitalWrite( B_MUX_1_PIN, LOW);
-					
-				}
-				break;
-
-				case  range3  :
-				{
-					// Ohm range 3
-					digitalWrite(  A_MUX_1_PIN,  LOW);
-					digitalWrite(  B_MUX_1_PIN, HIGH);
-					
-				}
-				break;
-			}
-		}
-    _delay_ms(2);
-		break;//for ohm device
-
-		case  Ammeter ://ammeter
-		{ 
-      //there is only one range
-      digitalWrite( B_MUX_2_PIN, LOW);
-      
-
-		}
-    _delay_ms(2);
-		break;//for Ammeter device
-
-		case  Voltmeter : //voltage
-		{
-			
-      digitalWrite( B_MUX_2_PIN, HIGH);
-			switch(range)
-			{
-				case  range1 :
-				{
-					// Volt range 1
-          digitalWrite( A_MUX_2_PIN, LOW);
-
-				}
-				break;
-
-				case  range2 :
-				{
-					// Volt range 2
-          digitalWrite( A_MUX_2_PIN, HIGH);
-
-				}
-				break;
-
-				case  range3 :
-				{
-					// Volt range 3
-					digitalWrite( A_MUX_2_PIN, LOW);
-
-				}
-				break;
-
-				case  range4 :
-				{
-					// Volt range 4
-					digitalWrite( A_MUX_2_PIN, HIGH);
-
-				}
-				break;
-
-			}
-		}
-    _delay_ms(2);
-		break;//for volt device
-
-    case  Square : //Square
-		{
-			
-      digitalWrite( A_MUX_1_PIN, LOW);
-      digitalWrite( B_MUX_1_PIN, LOW);
-
-		}
-    _delay_ms(2);
-		break;//for Square device
-
-    case  Tri  : //Tri 
-		{
-			
-      digitalWrite( A_MUX_1_PIN, HIGH);
-      digitalWrite( B_MUX_1_PIN, LOW);
-
-		}
-    _delay_ms(2);
-		break;//for Tri  device
-
-    case  Sin  : //Sin 
-		{
-			
-      digitalWrite( A_MUX_1_PIN, LOW);
-      digitalWrite( B_MUX_1_PIN, HIGH);
-
-
-		}
-    _delay_ms(2);
-		break;//for Sin  device
-	}
-  
-	return;
-}
