@@ -1,6 +1,6 @@
 #include "Osci.h"
 
-#define MAX_VRANGE  (6)
+#define MAX_VRANGE  (5)
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);   // device name is oled
@@ -8,7 +8,7 @@ Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);   // devi
 
 // Range name table (those are stored in flash memory)
 //const char vRangeName[10][5] PROGMEM = {"A50V", "A 5V", " 50V", " 20V", " 10V", "  5V", "  2V", "  1V", "0.5V", "0.2V"}; // Vertical display character (number of characters including \ 0 is required)
-const char vstring_table[MAX_VRANGE] [6] PROGMEM = { " 10V", "  5V", "  2V", "  1V", "0.5V", "0.2V"};
+const char vstring_table[MAX_VRANGE] [5] PROGMEM = { "  5V", "  2V", "  1V", "0.5V", "0.2V"};
 //const char hRangeName[10][6] PROGMEM = {"200ms", "100ms", " 50ms", " 20ms", " 10ms", "  5ms", "  2ms", "  1ms", "500us", "200us"};  //  Hrizontal display characters
 const char hstring_table[10] [6] PROGMEM = {"200ms", "100ms", " 50ms", " 20ms", " 10ms", "  5ms", "  2ms", "  1ms", "500us", "200us"};
 const PROGMEM float hRangeValue[] = { 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002, 0.001, 0.5e-3, 0.2e-3}; // horizontal range value in second. ( = 25pix on screen)
@@ -19,7 +19,7 @@ char hScale[] = "xxxAs";       // horizontal scale character
 char vScale[] = "xxxx";        // vartical scale
 
 float lsb5V = 0.00566826;      // sensivity coefficient of 5V range. std=0.00563965 1.1*630/(1024*120)
-float lsb50V = 0.05243212;     // sensivity coefficient of 50V range. std=0.0512898 1.1*520.91/(1024*10.91)
+//float lsb50V = 0.05243212;     // sensivity coefficient of 50V range. std=0.0512898 1.1*520.91/(1024*10.91)
 
 volatile char vRange;           // V-range number 0:A50V,  1:A 5V,  2:50V,  3:20V,  4:10V,  5:5V,  6:2V,  7:1V,  8:0.5V,  9:0.2V
 volatile char hRange;           // H-range nubmer 0:200ms, 1:100ms, 2:50ms, 3:20ms, 4:10ms, 5:5ms, 6;2ms, 7:1ms, 8:500us, 9;200us
@@ -39,7 +39,7 @@ int rangeMaxDisp;              // display value of max. (100x value)
 int rangeMinDisp;              // display value if min.
 int trigP;                     // trigger position pointer on data buffer
 boolean trigSync;              // flag of trigger detected
-int att10x;                    // 10x attenetor ON (effective when 1)
+//int att10x;                    // 10x attenetor ON (effective when 1)
 
 float waveFreq;                // frequency (Hz)
 float waveDuty;                // duty ratio (%)
@@ -62,7 +62,7 @@ void Osci_Init(void)
   analogReference(INTERNAL);            // ADC full scale = 1.1V
   attachInterrupt(0, pin2IRQ, FALLING); // activate IRQ at falling edge mode
 
-   vRange=5;           // V-range number 0:A50V,  1:A 5V,  2:50V,  3:20V,  4:10V,  5:5V,  6:2V,  7:1V,  8:0.5V,  9:0.2V
+   vRange=1;           // V-range number 0:5V,   1:2V,  2:1V,  3:0.5V,  4:0.2V
    hRange=1;           // H-range nubmer 0:200ms, 1:100ms, 2:50ms, 3:20ms, 4:10ms, 5:5ms, 6;2ms, 7:1ms, 8:500us, 9;200us
    trigD=1;            // trigger slope flag,     0:positive 1:negative
    scopeP=1;
@@ -95,78 +95,45 @@ static void setConditions() {           // measuring condition setting
   strcpy_P(hScale, hstring_table[hRange]);  // H range name
   strcpy_P(vScale, vstring_table[vRange]);  // Directly read from PROGMEM
 
-
   switch (vRange) {              // setting of Vrange
-    case 0: {                    // Auto50V range
-        att10x = 1;              // use input attenuator
-        break;
-      }
-    case 1: {                    // Auto 5V range
-        att10x = 0;              // no attenuator
-        break;
-      }
-    case 2: {                    // 50V range
-        rangeMax = 50 / lsb50V;  // set full scale pixcel count number
-        rangeMaxDisp = 5000;     // vartical scale (set100x value)
-        rangeMin = 0;
-        rangeMinDisp = 0;
-        att10x = 1;              // use input attenuator
-        break;
-      }
-    case 3: {                    // 20V range
-        rangeMax = 20 / lsb50V;  // set full scale pixcel count number
-        rangeMaxDisp = 2000;
-        rangeMin = 0;
-        rangeMinDisp = 0;
-        att10x = 1;              // use input attenuator
-        break;
-      }
-    case 4: {                    // 10V range
-        rangeMax = 10 / lsb50V;  // set full scale pixcel count number
-        rangeMaxDisp = 1000;
-        rangeMin = 0;
-        rangeMinDisp = 0;
-        att10x = 1;              // use input attenuator
-        break;
-      }
-    case 5: {                    // 5V range
+    case 0: {                    // 5V range
         rangeMax = 5 / lsb5V;    // set full scale pixcel count number
         rangeMaxDisp = 500;
         rangeMin = 0;
         rangeMinDisp = 0;
-        att10x = 0;              // no input attenuator
+        //att10x = 0;              // no input attenuator
         break;
       }
-    case 6: {                    // 2V range
+    case 1: {                    // 2V range
         rangeMax = 2 / lsb5V;    // set full scale pixcel count number
         rangeMaxDisp = 200;
         rangeMin = 0;
         rangeMinDisp = 0;
-        att10x = 0;              // no input attenuator
+        //att10x = 0;              // no input attenuator
         break;
       }
-    case 7: {                    // 1V range
+    case 2: {                    // 1V range
         rangeMax = 1 / lsb5V;    // set full scale pixcel count number
         rangeMaxDisp = 100;
         rangeMin = 0;
         rangeMinDisp = 0;
-        att10x = 0;              // no input attenuator
+        //att10x = 0;              // no input attenuator
         break;
       }
-    case 8: {                    // 0.5V range
+    case 3: {                    // 0.5V range
         rangeMax = 0.5 / lsb5V;  // set full scale pixcel count number
         rangeMaxDisp = 50;
         rangeMin = 0;
         rangeMinDisp = 0;
-        att10x = 0;              // no input attenuator
+        //att10x = 0;              // no input attenuator
         break;
       }
-    case 9: {                    // 0.5V range
+    case 4: {                    // 0.5V range
         rangeMax = 0.2 / lsb5V;  // set full scale pixcel count number
         rangeMaxDisp = 20;
         rangeMin = 0;
         rangeMinDisp = 0;
-        att10x = 0;              // no input attenuator
+        //att10x = 0;              // no input attenuator
         break;
       }
   }
@@ -208,12 +175,13 @@ static void writeCommonImage() {                 // Common screen image drawing
 }
 
 static void readWave() {                            // Record waveform to memory array
-  if (att10x == 1) {                         // if 1/10 attenuator required
+  
+  //if (att10x == 1) {                         // if 1/10 attenuator required
     //pinMode(12, OUTPUT);                     // assign attenuator controle pin to OUTPUT,
     //digitalWrite(12, LOW);                   // and output LOW (output 0V)
-  } else {                                   // if not required
+  //} else {                                   // if not required
     //pinMode(12, INPUT);                      // assign the pin input (Hi-z)
-  }
+  //}
   switchPushed = false;                      // Clear switch operation flag
 
   switch (hRange) {                          // set recording conditions in accordance with the range number
@@ -373,30 +341,6 @@ static void dataAnalize() {                       // get various information fro
   // calculate average
   dataAve = (sum + 10) / 20;               // Average value calculation (calculated by 10 times to improve accuracy)
 
-  // decide display's max min value
-  if (vRange <= 1) {                       // if Autorabge(Range number <=1）
-    rangeMin = dataMin - 20;               // maintain bottom margin 20
-    rangeMin = (rangeMin / 10) * 10;       // round 10
-    if (rangeMin < 0) {
-      rangeMin = 0;                        // no smaller than 0
-    }
-    rangeMax = dataMax + 20;               // set display top at  data max +20
-    rangeMax = ((rangeMax / 10) + 1) * 10; // round up 10
-    if (rangeMax > 1020) {
-      rangeMax = 1023;                     // if more than 1020, hold down at 1023
-    }
-
-    if (att10x == 1) {                            // if 10x attenuator used
-      rangeMaxDisp = 100 * (rangeMax * lsb50V);   // display range is determined by the data.(the upper limit is up to the full scale of the ADC)
-      rangeMinDisp = 100 * (rangeMin * lsb50V);   // lower depend on data, but zero or more
-    } else {                                      // if no attenuator used
-      rangeMaxDisp = 100 * (rangeMax * lsb5V);
-      rangeMinDisp = 100 * (rangeMin * lsb5V);
-    }
-  } else {                                        // if fix range
-    // Write necessary code here (none for now)
-  }
-
   // Trigger position search
   for (trigP = ((REC_LENG / 2) - 51); trigP < ((REC_LENG / 2) + 50); trigP++) { // Find the points that straddle the median at the center ± 50 of the data range
     if (trigD == 0) {                             // if trigger direction is positive
@@ -535,11 +479,7 @@ static void dispInf() {                          // Display of various informati
   }
 
   // average voltage
-  if (att10x == 1) {                         // if 10x attenuator is used
-    voltage = dataAve * lsb50V / 10.0;       // 50V range value
-  } else {                                   // no!
-    voltage = dataAve * lsb5V / 10.0;        // 5V range value
-  }
+  voltage = dataAve * lsb5V / 10.0;          // 5V range value
   if (voltage < 10.0) {                      // if less than 10V
     dtostrf(voltage, 4, 2, chrBuff);         // format x.xx
   } else {                                   // no!
@@ -551,29 +491,17 @@ static void dispInf() {                          // Display of various informati
 
   // vartical scale lines
   voltage = rangeMaxDisp / 100.0;            // convart Max voltage
-  if (vRange == 1 || vRange > 4) {           // if range below 5V or Auto 5V
-    dtostrf(voltage, 4, 2, chrBuff);         // format *.**
-  } else {                                   // no!
-    dtostrf(voltage, 4, 1, chrBuff);         // format **.*
-  }
+  dtostrf(voltage, 4, 2, chrBuff);
   oled.setCursor(0, 9);
   oled.print(chrBuff);                       // display Max value
 
   voltage = (rangeMaxDisp + rangeMinDisp) / 200.0; // center value calculation
-  if (vRange == 1 || vRange > 4) {           // if range below 5V or Auto 5V
-    dtostrf(voltage, 4, 2, chrBuff);         // format *.**
-  } else {                                   // no!
-    dtostrf(voltage, 4, 1, chrBuff);         // format **.*
-  }
+  dtostrf(voltage, 4, 2, chrBuff);
   oled.setCursor(0, 33);
   oled.print(chrBuff);                       // display the value
 
   voltage = rangeMinDisp / 100.0;            // convart Min vpltage
-  if (vRange == 1 || vRange > 4) {           // if range below 5V or Auto 5V
-    dtostrf(voltage, 4, 2, chrBuff);         // format *.**
-  } else {                                   // no!
-    dtostrf(voltage, 4, 1, chrBuff);         // format **.*
-  }
+  dtostrf(voltage, 4, 2, chrBuff);
   oled.setCursor(0, 57);
   oled.print(chrBuff);                       // display the value
 
@@ -699,28 +627,7 @@ static void auxFunctions() {                       // voltage meter function
       delay(150);
     }
   }
-  if (digitalRead(Down_Bot) == LOW) {             // if DOWN botton pushed, 50V range
-    analogReference(INTERNAL);
-    //pinMode(12, OUTPUT);                    // Set the attenuator control pin to OUTPUT
-    //digitalWrite(12, LOW);                  // output LOW
-    while (1) {                             // do forever
-      //digitalWrite(13, HIGH);               // flush LED
-      voltage = analogRead(Osci_In) * lsb50V;     // measure voltage
-      oled.clearDisplay();                  // erase screen (0.4ms)
-      oled.setTextColor(WHITE);             // write in white character
-      oled.setCursor(26, 16);               //
-      oled.setTextSize(1);                  // by standerd size character
-      oled.println(F("DVM 50V Range"));
-      oled.setCursor(35, 30);               //
-      oled.setTextSize(2);                  // double size character
-      dtostrf(voltage, 4, 1, chrBuff);      // display batterry voltage xx.xV
-      oled.print(chrBuff);
-      oled.println(F("V"));
-      oled.display();
-      //digitalWrite(13, LOW);                // stop LED flash
-      delay(150);
-    }
-  }
+
 }
 
 static void uuPinOutputLow(unsigned int d, unsigned int a) { // 指定ピンを出力、LOWに設定
@@ -751,7 +658,7 @@ static void pin2IRQ() {                   // Pin2(int.0) interrupr handler
   if ((x & 0x02) == 0) {           // if UP button(Pin9) pusshed, and
     if (scopeP == 0) {             // scoped vertical range
       vRange++;                    // V-range up !
-      if (vRange > MAX_VRANGE-1) {            // if upper limit
+      if (vRange > (MAX_VRANGE-1)) {            // if upper limit
         vRange = MAX_VRANGE-1;                // stay as is
       }
     }
