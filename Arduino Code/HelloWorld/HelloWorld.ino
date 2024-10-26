@@ -1,30 +1,39 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Wire.h>
+#include "Osci.h"
 
-#define   ANCHO 128
-#define   ALTO  64
+#define   SCREEN_WIDTH 128
+#define   SCREEN_HEIGHT  64
 
-Adafruit_SSD1306  display(ANCHO,  ALTO, &Wire,  -1);
+extern Adafruit_SSD1306 oled;   // device name is oled
+
 
 void setup(){
   Serial.begin(9600);
-
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3D)){
+  Osci_Init();
+  if(!oled.begin(SSD1306_SWITCHCAPVCC, 0x3D)){
     Serial.println("NO DIS");
     for(;;);
   }
 
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setCursor(0,0);
-  display.println("NO DIS");
-  display.display();
-  delay(100);
+  oled.clearDisplay();
+  oled.setTextSize(1);
+  oled.setTextColor(WHITE);
+  oled.setCursor(0,0);
+  oled.println("NO DIS");
+  oled.display();
+  delay(3000);
 
 }
 
 void loop(){
-
+  //Osci_Run();
+  oled.clearDisplay();
+  oled.setTextSize(1);
+  oled.setTextColor(WHITE);
+  oled.setCursor(0,0);
+  oled.println("NO DIS2");
+  oled.display();
+  delay(3000);
 }
