@@ -1,4 +1,6 @@
-#include "Multi_Metre.h"
+#include "Multi_Metre_Sig.h"
+
+#define DC_BIAS_VAL   (450)
 
 void MM_Init(void)
 {
@@ -11,7 +13,6 @@ void MM_Init(void)
 
 fint32_t Read_Volt( ranges Vrange, modes mode)
 {
-
   // Vin = VSlope *  Vout + Vconst
 	
   int Vout;
@@ -66,7 +67,7 @@ fint32_t Read_Volt( ranges Vrange, modes mode)
 
     case AC_MODE:
 
-      Vout=analogRead(OUT_AC_PIN);
+      Vout=analogRead(OUT_AC_PIN)-analogRead(OUT_DC_PIN)+DC_BIAS_VAL;
 
       switch(Vrange)
       {
@@ -172,7 +173,7 @@ fint32_t Read_Amp( ranges Irange, modes mode)
 
     case AC_MODE:
 
-      Iout=analogRead(OUT_AC_PIN);
+      Iout=analogRead(OUT_AC_PIN)-analogRead(OUT_DC_PIN)+DC_BIAS_VAL;
 
       switch(Irange)
       {
@@ -336,8 +337,7 @@ void Select_Mux(devices device, ranges range)
 		case  Ammeter ://ammeter
 		{ 
       //there is only one range
-      digitalWrite( A_MUX_1_PIN, LOW);
-      digitalWrite( B_MUX_1_PIN, LOW);
+      digitalWrite( B_MUX_2_PIN, LOW);
       
 
 		}
@@ -346,16 +346,15 @@ void Select_Mux(devices device, ranges range)
 
 		case  Voltmeter : //voltage
 		{
-			digitalWrite( A_MUX_1_PIN, HIGH);
-      digitalWrite( B_MUX_1_PIN, LOW);
+			
+      digitalWrite( B_MUX_2_PIN, HIGH);
 			switch(range)
 			{
 				case  range1 :
 				{
 					// Volt range 1
           digitalWrite( A_MUX_2_PIN, LOW);
-					digitalWrite( B_MUX_2_PIN, LOW);
-					
+
 				}
 				break;
 
@@ -363,8 +362,7 @@ void Select_Mux(devices device, ranges range)
 				{
 					// Volt range 2
           digitalWrite( A_MUX_2_PIN, HIGH);
-					digitalWrite( B_MUX_2_PIN, LOW);
-					
+
 				}
 				break;
 
@@ -372,7 +370,7 @@ void Select_Mux(devices device, ranges range)
 				{
 					// Volt range 3
 					digitalWrite( A_MUX_2_PIN, LOW);
-					digitalWrite( B_MUX_2_PIN, HIGH);
+
 				}
 				break;
 
@@ -380,7 +378,7 @@ void Select_Mux(devices device, ranges range)
 				{
 					// Volt range 4
 					digitalWrite( A_MUX_2_PIN, HIGH);
-					digitalWrite( B_MUX_2_PIN, HIGH);
+
 				}
 				break;
 
@@ -388,6 +386,37 @@ void Select_Mux(devices device, ranges range)
 		}
     _delay_ms(2);
 		break;//for volt device
+
+    case  Square : //Square
+		{
+			
+      digitalWrite( A_MUX_1_PIN, LOW);
+      digitalWrite( B_MUX_1_PIN, LOW);
+
+		}
+    _delay_ms(2);
+		break;//for Square device
+
+    case  Tri  : //Tri 
+		{
+			
+      digitalWrite( A_MUX_1_PIN, HIGH);
+      digitalWrite( B_MUX_1_PIN, LOW);
+
+		}
+    _delay_ms(2);
+		break;//for Tri  device
+
+    case  Sin  : //Sin 
+		{
+			
+      digitalWrite( A_MUX_1_PIN, LOW);
+      digitalWrite( B_MUX_1_PIN, HIGH);
+
+
+		}
+    _delay_ms(2);
+		break;//for Sin  device
 	}
   
 	return;

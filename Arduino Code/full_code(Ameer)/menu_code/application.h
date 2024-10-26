@@ -27,6 +27,7 @@ typedef enum menus
   ConfigMenu
 };
 
+/*
 typedef enum sig_type
 {
   Off,
@@ -34,3 +35,4 @@ typedef enum sig_type
   Triangular,
   Sine
 };
+*/
