@@ -1,38 +1,49 @@
-#include <U8g2lib.h>
 #include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
-// Initialize the display using U8g2 with I2C address 0x3D
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE); // U8G2_R0 is the rotation option
 
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET     -1      // Reset pin # (or -1 if sharing Arduino reset pin)
 
-#define OLED_ADDRESS 0x3D  // Set the I2C address
+// Create an SSD1306 display object (I2C address is usually 0x3D or 0x3C)
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);   // device name is oled
+
+#define SSD1306_I2C_ADDRESS 0x3D  // Set the I2C address
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define LED1 12
 #define LED2 7
 #define LED3 6
 #define LED4 5
+//#define OLED_RESET (-1)
 
-void draw(void) {
-  // Set font and position for drawing
-  
-  u8g2.setFont(u8g2_font_unifont_t_symbols);  // Use a font compatible with U8g2
-  u8g2.drawStr(0, 20, "Hello World!");        // Draw "Hello World!" at (0, 20)
-  
+bool x = false;
+
+// Define a bitmap for a signal generator icon, 16x16 pixels
+const unsigned char sig_gen_bitmap[] PROGMEM = {
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0x87,
+    0x20, 0x84, 0x20, 0x84, 0x20, 0x84, 0x20, 0x84,
+    0x20, 0x84, 0x20, 0x84, 0x20, 0x84, 0x20, 0x84,
+    0x20, 0x84, 0xe0, 0xfc, 0x00, 0x00, 0x00, 0x00
+};
+
+void setup() {
+    // Initialize the display
+    if (!display.begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS)) { // Use the defined I2C address
+        Serial.println(F("SSD1306 allocation failed"));
+        for (;;); // Don't proceed, loop forever
+    }
+    display.clearDisplay();
+
+    // Draw the bitmap at coordinates (x, y)
+    display.drawBitmap(56, 24, sig_gen_bitmap, 16, 16, WHITE); // Centering the 16x16 bitmap
+
+    // Show the display
+    display.display();
 }
 
-void setup(void) {
-  u8g2.setI2CAddress(OLED_ADDRESS << 1); // Shift address for the library
-  u8g2.begin();  // Initialize the display
-  
-  // u8g2.setFlipMode(1); // Uncomment this if the display is upside down
-}
-
-void loop(void) {
-  u8g2.firstPage();  
-  do {
-    draw();
-  } while (u8g2.nextPage());
-  
-  delay(500);
+void loop() {
+  // Do nothing here
 }
