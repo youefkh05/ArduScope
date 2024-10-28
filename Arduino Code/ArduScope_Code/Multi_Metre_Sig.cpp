@@ -11,7 +11,7 @@ void MM_Init(void)
   pinMode(B_MUX_2_PIN, OUTPUT);
 }
 
-fint32_t Read_Volt( ranges Vrange, modes mode)
+float Read_Volt( ranges Vrange, modes mode)
 {
   // Vin = VSlope *  Vout + Vconst
 	
@@ -19,36 +19,41 @@ fint32_t Read_Volt( ranges Vrange, modes mode)
 
   Vout=-1;
 
-  fint32_t Vin;
+  float Vin;
 
 	Vin = -1;
-
-	fint32_t V_Slope;
+  /*
+	float V_Slope;
 
 	V_Slope = -1;
 
-	fint32_t Vconst;
+	float Vconst;
 
 	Vconst  = -1;
+  */
   
   switch(mode)
   { 
     case DC_MODE:
 
       Vout=analogRead(OUT_DC_PIN);
-      
-      switch(Vrange)
+      Vin =  Vout*5.0/1024.0;
+      //Vin = V_Slope*  Vf + Vconst; //equation
+
+      switch(Vrange) 
       {
         case  range1 ://300mV
-        V_Slope   =   0.139574;
-        Vconst    =   -0.28634;
+        //V_Slope   =   0.139574;
+        //Vconst    =   -0.28634;
+        Vin= (0.139574*Vin) -0.28634;
         break;
 
         case  range2 ://3V
-        V_Slope   =   1.394078;
-        Vconst    =   -2.96428;
+        //V_Slope   =   1.394078;
+        //Vconst    =   -2.96428;
+        Vin= (1.394078*Vin) -2.96428;
         break;
-
+        /*
         case  range3 ://30V
         V_Slope  =   0.0587325;
         Vconst    =   2.5144325;
@@ -62,25 +67,29 @@ fint32_t Read_Volt( ranges Vrange, modes mode)
         default:
         //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
         break;
+        */
       }
     break;
 
     case AC_MODE:
 
       Vout=analogRead(OUT_AC_PIN)-analogRead(OUT_DC_PIN)+DC_BIAS_VAL;
+      Vin =  Vout*5.0/1024.0;
 
       switch(Vrange)
       {
         case  range1 ://300mV
-        V_Slope   =   0.1664;
-        Vconst    =   -0.35624;
+        //V_Slope   =   0.1664;
+        //Vconst    =   -0.35624;
+        Vin= (0.1664*Vin) -0.35624;
         break;
 
         case  range2 ://3V
-        V_Slope   =   1.634254;
-        Vconst    =   -3.683854;
+        //V_Slope   =   1.634254;
+        //Vconst    =   -3.683854;
+        Vin= (1.634254*Vin) -3.683854;
         break;
-
+        /*
         case  range3 ://30V
         V_Slope  =   0.0587325;
         Vconst    =   2.5144325;
@@ -94,6 +103,7 @@ fint32_t Read_Volt( ranges Vrange, modes mode)
         default:
         //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
         break;
+        */
       }
     break;  
   }
@@ -105,18 +115,18 @@ fint32_t Read_Volt( ranges Vrange, modes mode)
 	}
     
   //make it in volt and float  
-  fint32_t  Vf =  Vout*5.0/1024.0;
+  //float  Vf =  Vout*5.0/1024.0;
 
   //Serial.print("Vf= ");
   //Serial.println(Vf);
 
-  Vin = V_Slope*  Vf + Vconst; //equation
+  //Vin = V_Slope*  Vf + Vconst; //equation
       
   return Vin;  
 	
 }
 
-fint32_t Read_Amp( ranges Irange, modes mode)
+float Read_Amp( ranges Irange, modes mode)
 {	
 
   // Iin = ISlope *  Iout + Iconst
@@ -125,36 +135,39 @@ fint32_t Read_Amp( ranges Irange, modes mode)
 
   Iout=-1;
 
-  fint32_t Iin;
+  float Iin;
 
 	Iin = -1;
-
-	fint32_t I_Slope;
+  /*
+	float I_Slope;
 
 	I_Slope = -1;
 
-	fint32_t Iconst;
+	float Iconst;
 
 	Iconst  = -1;
-
+  */
    switch(mode)
   { 
     case DC_MODE:
 
       Iout=analogRead(OUT_DC_PIN);
-      
+      Iin =  Iout*5.0/1024.0;
+
       switch(Irange)
       {
         case  range1 ://2mAmp
-        I_Slope   =   0.139574;
-        Iconst    =   -0.28634;
+        //I_Slope   =   0.139574;
+        //Iconst    =   -0.28634;
+        Iin= (0.139574*Iin) -0.28634;
         break;
 
         case  range2 ://20mAmp
-        I_Slope   =   83.8305;
-        Iconst    =   -173.84642;
+        //I_Slope   =   83.8305;
+        //Iconst    =   -173.84642;
+        Iin= (83.8305*Iin) -173.84642;
         break;
-
+        /*
         case  range3 ://200mAmp
         I_Slope   =   83.8305;
         Iconst    =   -173.84642;
@@ -168,25 +181,29 @@ fint32_t Read_Amp( ranges Irange, modes mode)
         default:
         //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
         break;
+        */
       }
     break;
 
     case AC_MODE:
 
       Iout=analogRead(OUT_AC_PIN)-analogRead(OUT_DC_PIN)+DC_BIAS_VAL;
+      Iin =  Iout*5.0/1024.0;
 
       switch(Irange)
       {
         case  range1 ://2mAmp
-        I_Slope   =   83.8305;
-        Iconst    =   -173.84642;
+        //I_Slope   =   83.8305;
+        //Iconst    =   -173.84642;
+        Iin= (83.8305*Iin) -173.84642;
         break;
 
         case  range2 ://20mAmp
-        I_Slope   =   1.634254;
-        Iconst    =   -3.683854;
+        //I_Slope   =   1.634254;
+        //Iconst    =   -3.683854;
+        Iin= (1.634254*Iin) -3.683854;
         break;
-
+        /*
         case  range3 ://200mAmp
         I_Slope   =   90.91;
         Iconst    =   -195.4545;
@@ -200,6 +217,7 @@ fint32_t Read_Amp( ranges Irange, modes mode)
         default:
         //LCD_Display_String((uint8_t*)"Wrong, select a proper range ya 7aywan");
         break;
+        */
       }
     break;  
   }
@@ -212,20 +230,22 @@ fint32_t Read_Amp( ranges Irange, modes mode)
   {
 		return -1.99;
 	}
-    
+
+  /*  
   //make it in volt and float  
-  fint32_t  If =  Iout*5.0/1024.0;
+  float  If =  Iout*5.0/1024.0;
 
   //Serial.print("If= ");
   //Serial.println(If);
 
   Iin = I_Slope*  If + Iconst; //equation
-      
+  */
+
   return Iin;  
 	
 }
 
-fint32_t Read_Ohm( ranges range)
+float Read_Ohm( ranges range)
 {
 	// range 1:10k 2:100k 3: 1M
 	if (range >  5  || range <  1 )
@@ -237,43 +257,48 @@ fint32_t Read_Ohm( ranges range)
 
   int Rout=analogRead(OUT_RIN_PIN);
 
-  fint32_t Rin  = 0;
+  float Rin  = Rout*5.0/1024.0;;
+  /*
+  float m1       =   -1;
 
-  fint32_t m1       =   -1;
+  float m2       =   -1;
 
-  fint32_t m2       =   -1;
-
-  fint32_t Rconst   =   -1;
+  float Rconst   =   -1;
+  */
 
   switch(range)
   {
     case  range1 ://10k  Ohm
 
-		  m1      =   7.408666;
+		  //m1      =   7.408666;
 
-      m2      =   -58.75646;
+      //m2      =   -58.75646;
 
-      Rconst  =   118.38925;
+      //Rconst  =   118.38925;
 
+      Rin=(7.408666* Rin* Rin) +(-58.75646* Rin) +118.38925;
 		break;
 
 		case  range2 ://100k Ohm
 	
-		m1      =   874.13015;
+		//m1      =   874.13015;
 
-    m2      =   -8139.9605;
+    //m2      =   -8139.9605;
 
-    Rconst  =   18961.3339;
+    //Rconst  =   18961.3339;
 
+    Rin=(874.13015* Rin* Rin) +(-8139.9605* Rin) +18961.3339;
 		break;
 
 		case  range3 ://1M   Ohm
 		
-		m1      =   17433.97271;
+		//m1      =   17433.97271;
 
-    m2      =   -165272.9212;
+    //m2      =   -165272.9212;
 
-    Rconst  =   391784.0959;
+    //Rconst  =   391784.0959;
+
+    Rin=(17433.97271* Rin* Rin) +(-165272.9212* Rin) +391784.0959;
 
 		break;
 
@@ -282,13 +307,15 @@ fint32_t Read_Ohm( ranges range)
 		break;
   }
 
+  /*
   //make it in volt and float  
-  fint32_t  Rf =  Rout*5.0/1024.0;
+  float  Rf =  Rout*5.0/1024.0;
 
   //Serial.print("Rf= ");
   //Serial.println(Rf);
   
 	Rin=m1* Rf* Rf + m2* Rf + Rconst;
+  */
 
 	return Rin;
 
@@ -365,7 +392,7 @@ void Select_Mux(devices device, ranges range)
 
 				}
 				break;
-
+        /*
 				case  range3 :
 				{
 					// Volt range 3
@@ -381,6 +408,7 @@ void Select_Mux(devices device, ranges range)
 
 				}
 				break;
+        */
 
 			}
 		}

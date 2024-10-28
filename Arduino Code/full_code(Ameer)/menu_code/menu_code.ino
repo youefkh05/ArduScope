@@ -1,19 +1,34 @@
-#include "U8glib.h"
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include "bitmaps.h"
 #include "application.h"
 #include "Multi_Metre_Sig.h"
-#include <stdint.h>
+//#include <stdint.h>
 
-U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_DEV_0 | U8G_I2C_OPT_NO_ACK | U8G_I2C_OPT_FAST); // Fast I2C / TWI
-// U8GLIB_SSD1306_128X64 u8g(13, 11, 8, 9, 10); // SPI connection
-// for SPI connection, use this wiring:
-// GND > GND
-// VCC > 5V
-// SCL > 13
-// SDA > 11
-// RES > 10
-// DC > 9
-// CS > 8
+// OLED display width and height, in pixels
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1        // Reset pin (set to -1 if sharing Arduino reset pin)
+
+// I2C address of the OLED display (usually 0x3C or 0x3D)
+#define SSD1306_I2C_ADDRESS 0x3D  
+
+// Initialize the display object for I2C
+Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+// Define constants for text size and color
+#define TEXT_SIZE 1
+#define TEXT_COLOR WHITE
+
+// Function to draw a menu item
+void drawMenuItem(int y_position, const char* item_text, const uint8_t* item_bitmap) {
+    oled.setTextSize(TEXT_SIZE);
+    oled.setTextColor(TEXT_COLOR);
+    oled.setCursor(26, y_position);
+    oled.print(item_text);
+    oled.drawBitmap(3, y_position - 13, item_bitmap, 16, 16, TEXT_COLOR); // Adjusted y position for bitmap
+}
 
 char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {
   {"Voltmeter"},
@@ -44,12 +59,20 @@ devices device_selected = Voltmeter;
 ranges  range_selected = range1;
 modes mode_selected = DC_MODE;
 
-fint32_t device_reading = 0;
+float device_reading = 0;
 
 void setup()
 {
   MM_Init();
-  u8g.setColorIndex(1);  // set the color to white
+  // Start the display with the appropriate I2C address
+  if (!oled.begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for (;;); // Stop here if allocation fails
+  }
+  oled.clearDisplay();
+  oled.display();  // Initial display update
+  // Set the text color to white
+  oled.setTextColor(WHITE);
 
   // define pins for buttons
   // INPUT_PULLUP means the button is HIGH when not pressed, and LOW when pressed
@@ -203,6 +226,45 @@ switch (device_selected)
   
 /**************************************************************************************************/
                 /*OLED Main Menu*/
+  /* OLED Main Menu */
+  oled.clearDisplay(); // Clear the display before drawing each frame
+  switch (selected_menu) {
+      case MainMenu:
+          // Selection box and scroll bar
+          oled.drawBitmap(0, 0, epd_bitmap_bg, SCREEN_WIDTH, SCREEN_HEIGHT, TEXT_COLOR);
+
+          // Draw Menu Items
+          drawMenuItem(15, menu_items[item_sel_previous], bitmap_arr[item_sel_previous]); // Menu Item 1
+          drawMenuItem(37, menu_items[item_selected], bitmap_arr[item_selected]); // Menu Item 2
+          drawMenuItem(59, menu_items[item_sel_next], bitmap_arr[item_sel_next]); // Menu Item 3
+          break;
+
+      case VoltmeterMenu:
+          // Voltmeter Menu code
+          break;
+
+      case AmmeterMenu:
+          // Ammeter Menu code
+          break;
+
+      case OhmmeterMenu:
+          // Ohmmeter Menu code
+          break;
+
+      case SigGenMenu:
+          // Selection box and scroll bar
+          oled.drawBitmap(0, 0, epd_bitmap_bg, SCREEN_WIDTH, SCREEN_HEIGHT, TEXT_COLOR);
+          // Signal Generator Menu code
+          break;
+
+      case ConfigMenu:
+          // Config Menu code
+          break;
+  }
+
+  oled.display(); // Update the display with the new content
+  delay(50); // Optional: Delay for stability or to control the refresh rate
+  /*
   u8g.firstPage();
   do
   {
@@ -258,4 +320,5 @@ switch (device_selected)
     }
 
   } while(u8g.nextPage());
+  */
 }

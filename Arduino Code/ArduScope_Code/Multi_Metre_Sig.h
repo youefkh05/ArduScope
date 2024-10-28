@@ -10,7 +10,7 @@
 
 /*  Include */
 #include <Arduino.h>
-#include <stdint.h>
+//#include <stdint.h>
 
 //input
 #define   OUT_DC_PIN    (A0)
@@ -51,27 +51,22 @@ enum modes{
 #define   A_MUX_2_PIN       (3)
 #define   B_MUX_2_PIN       (2)
 
-
-typedef float fint32_t;
-
-
-
 // Function Prototypes
 void MM_Init(void);
 
 //mode:AC,DC  Range:300mV, 3v, 30v, 400v
-fint32_t Read_Volt( ranges Vrange, modes mode);
+float Read_Volt( ranges Vrange, modes mode);
 
 //mode:AC,DC  Range:2mAmp, 20mAmp, 200mAmp, 1Amp
-fint32_t Read_Amp( ranges Irange, modes mode);
+float Read_Amp( ranges Irange, modes mode);
 
 //Range:10k, 100k, 1M
-fint32_t Read_Ohm( ranges range);
+float Read_Ohm( ranges range);
 
 //Devices: Ohmeter, Ammeter, Voltmeter, Square, Tri, Sin    Ranges: 1, 2, 3, 4
 void Select_Mux( devices device, ranges range);
 
-uint8_t Ask_To_Return( uint8_t return_key);
+//uint8_t Ask_To_Return( uint8_t return_key);
 
 
 

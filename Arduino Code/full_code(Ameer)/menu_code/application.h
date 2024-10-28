@@ -1,12 +1,12 @@
-#include <stdint.h>
+//#include <stdint.h>
 
 // Definitions
-#define BUTTON_UP_PIN           12
-#define BUTTON_SELECT_PIN       8
-#define BUTTON_DOWN_PIN         4
+#define BUTTON_UP_PIN           (5)
+#define BUTTON_SELECT_PIN       (3)
+#define BUTTON_DOWN_PIN         (6)
 
-#define NUM_ITEMS           5
-#define MAX_ITEM_LENGTH     20
+#define NUM_ITEMS           (5)
+#define MAX_ITEM_LENGTH     (20)
 
 //  Flags type
 typedef struct flag_type
@@ -26,6 +26,7 @@ typedef enum menus
   SigGenMenu,
   ConfigMenu
 };
+
 
 /*
 typedef enum sig_type
