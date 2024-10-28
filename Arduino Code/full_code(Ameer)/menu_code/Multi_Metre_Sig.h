@@ -13,8 +13,8 @@
 //#include <stdint.h>
 
 //input
-#define   OUT_DC_PIN    (A0)
-#define   OUT_AC_PIN    (A1)
+#define   OUT_DC_PIN    (A1)
+#define   OUT_AC_PIN    (A3)
 #define   OUT_RIN_PIN   (A2)
 
 // Define an enum for devices
@@ -44,12 +44,12 @@ enum modes{
 
 
 //MUX1
-#define   A_MUX_1_PIN       (5)
-#define   B_MUX_1_PIN       (4)
+#define   A_MUX_1_PIN       (12)
+#define   B_MUX_1_PIN       (7)
 
 //MUX2
-#define   A_MUX_2_PIN       (3)
-#define   B_MUX_2_PIN       (2)
+#define   A_MUX_2_PIN       (13)
+#define   B_MUX_2_PIN       (4)
 
 // Function Prototypes
 void MM_Init(void);
