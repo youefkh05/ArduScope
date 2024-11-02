@@ -32,12 +32,14 @@
 #define   Hold_Bot          (11)
 #define   Osci_In           (A0)
 
-typedef struct flag_type
+
+typedef struct flag_type1
 {
   uint8_t button_up_f: 1;
   uint8_t button_down_f: 1;
   uint8_t button_select_f: 1;
 };
+
 
 void Osci_Init(void);
 

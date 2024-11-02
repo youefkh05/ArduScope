@@ -16,7 +16,7 @@ const char vstring_table[MAX_VRANGE] [5] PROGMEM = { "  5V", "  2V", "  1V", "0.
 //const char hRangeName[10][6] PROGMEM = {"200ms", "100ms", " 50ms", " 20ms", " 10ms", "  5ms", "  2ms", "  1ms", "500us", "200us"};  //  Hrizontal display characters
 const char hstring_table[MAX_HRANGE] [6] PROGMEM = {"200ms", " 50ms", " 10ms", "  2ms", "500us", "200us"};
 const PROGMEM float hRangeValue[] = { 0.2, 0.05, 0.01, 0.002, 0.5e-3, 0.2e-3}; // horizontal range value in second. ( = 25pix on screen)
-flag_type flags = { };
+flag_type1 flags1 = { };
 
 int waveBuff[REC_LENG];        // wave form buffer (RAM remaining capacity is barely)
 char chrBuff[8];               // display string buffer
@@ -91,9 +91,9 @@ void Osci_Run(void) {
   scopeP=false;
 
   startScreen(); // display start message
-  flags.button_select_f = 0;
+  flags1.button_select_f = 0;
   
-  while(flags.button_select_f == 0){
+  while(flags1.button_select_f == 0){
     setConditions();                      // set measurment conditions
     readWave();                           // read wave form and store into buffer memory
     setConditions();                      // set measurment conditions again (reflect change during measure)
@@ -111,14 +111,14 @@ void Osci_Run(void) {
     if((digitalRead(Exit_Bot) == LOW))
     {
       delay(30); // Rebounce Delay
-      if((digitalRead(Exit_Bot) == LOW)  && (flags.button_select_f == 0))
+      if((digitalRead(Exit_Bot) == LOW)  && (flags1.button_select_f == 0))
       {
-        flags.button_select_f = 1;
+        flags1.button_select_f = 1;
       }
     }
     else
     {
-      flags.button_select_f = 0;
+      flags1.button_select_f = 0;
     }
 
   }        

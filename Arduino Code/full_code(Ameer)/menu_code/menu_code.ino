@@ -2,6 +2,7 @@
 #include "bitmaps.h"
 #include "application.h"
 #include "Multi_Metre_Sig.h"
+#include "Osci.h"
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -62,6 +63,7 @@ void setup()
   pinMode(BUTTON_UP_PIN, INPUT_PULLUP); // up button
   pinMode(BUTTON_SELECT_PIN, INPUT_PULLUP); // select button
   pinMode(BUTTON_DOWN_PIN, INPUT_PULLUP); // down button
+  Osci_Init();
 }
 
 void loop() 
@@ -287,7 +289,7 @@ itoa(device_reading, reading_arr,10); //Change reading to str to be printed on s
       break;
 
       case AmmeterMenu:
-
+      
       u8g.setFont(u8g_font_7x14B);
       u8g.drawStr(26,37, "Ammeter Reading");
       u8g.setFont(u8g_font_7x14);

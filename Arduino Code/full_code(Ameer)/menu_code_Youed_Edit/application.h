@@ -1,11 +1,12 @@
 //#include <stdint.h>
 
 // Definitions
-#define BUTTON_UP_PIN           (6)
+#define BUTTON_UP_PIN           (5)
 #define BUTTON_SELECT_PIN       (3)
-#define BUTTON_DOWN_PIN         (5)
+#define BUTTON_DOWN_PIN         (6)
 
-#define MAX_ITEM_LENGTH     (10)
+#define NUM_ITEMS           (5)
+#define MAX_ITEM_LENGTH     (20)
 
 //  Flags type
 typedef struct flag_type

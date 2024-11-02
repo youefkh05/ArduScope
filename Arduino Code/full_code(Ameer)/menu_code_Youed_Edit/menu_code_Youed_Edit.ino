@@ -1,6 +1,8 @@
+
+#include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
-#include <Adafruit_SH110X.h>
+#include "Adafruit_SH1106.h"
 #include "bitmaps.h"
 #include "application.h"
 #include "Multi_Metre_Sig.h"
@@ -9,13 +11,10 @@
 // OLED display width and height, in pixels
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-#define OLED_RESET -1        // Reset pin (set to -1 if sharing Arduino reset pin)
+#define OLED_RESET 4        // Reset pin (set to -1 if sharing Arduino reset pin)
 
-// I2C address of the OLED display (usually 0x3C or 0x3D)
-#define SSD1306_I2C_ADDRESS 0xBC
+Adafruit_SH1106 oled(OLED_RESET);
 
-// Initialize the display object for I2C
-Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Define constants for text size and color
 #define TEXT_SIZE 1
@@ -64,11 +63,17 @@ float device_reading = 0;
 void setup()
 {
   MM_Init();
+  Serial.begin(9600);
+
+  // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
+  oled.begin(SH1106_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
   // Start the display with the appropriate I2C address
+  /*
   if (!oled.begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
     for (;;); // Stop here if allocation fails
   }
+  */
   oled.clearDisplay();
   oled.display();  // Initial display update
   // Set the text color to white
