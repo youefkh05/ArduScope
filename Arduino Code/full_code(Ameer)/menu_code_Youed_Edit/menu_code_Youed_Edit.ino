@@ -6,27 +6,39 @@
 #include "bitmaps.h"
 #include "application.h"
 #include "Multi_Metre_Sig.h"
+#include "eerom_map.h"
 //#include <stdint.h>
 
 // OLED display width and height, in pixels
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-#define OLED_RESET 4        // Reset pin (set to -1 if sharing Arduino reset pin)
+//OLED Definitions
+#define SCREEN_WIDTH      (128)   // OLED display width
+#define SCREEN_HEIGHT     (64)    // OLED display height
+#define REC_LENG          (200)   // size of wave data buffer
+#define MIN_TRIG_SWING     (5)    // minimum trigger swing.(Display "Unsync" if swing smaller than this value
+#define OLED_RESET        (-1)    // Reset pin # (or -1 if sharing Arduino reset pin)
+#define OLED_I2C_ADDRESS  (0x3C)
 
-Adafruit_SH1106 oled(OLED_RESET);
-
+// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+//Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);   // device name is oled
+Adafruit_SH1106 oled(OLED_RESET);        // use this when SH1106
 
 // Define constants for text size and color
 #define TEXT_SIZE 1
 #define TEXT_COLOR WHITE
 
 // Function to draw a menu item
-void drawMenuItem(int y_position, const char* item_text, const uint8_t* item_bitmap) {
+void drawMenuItem(int y_position, const char* item_text, const int index) {
+    // Buffer to hold the bitmap read from EEPROM
+    uint8_t bitmapBuffer[BIT_MAP_SIZE];
     oled.setTextSize(TEXT_SIZE);
     oled.setTextColor(TEXT_COLOR);
-    oled.setCursor(26, y_position);
+    oled.setCursor(26, y_position-8);
     oled.print(item_text);
-    oled.drawBitmap(3, y_position - 13, item_bitmap, 16, 16, TEXT_COLOR); // Adjusted y position for bitmap
+    readBitmapFromEEPROM(bitmapBuffer, index, BIT_MAP_SIZE);
+    //oled.drawBitmap(3, y_position - 13, item_bitmap, 16, 16, TEXT_COLOR); // Adjusted y position for bitmap
+    oled.drawBitmap(3, y_position - 13,  bitmapBuffer, 16, 16, TEXT_COLOR); // Adjusted y position for bitmap
+    delay(1);
+    
 }
 
 char menu_items [NUM_ITEMS] [MAX_ITEM_LENGTH] = {
@@ -65,9 +77,10 @@ void setup()
   MM_Init();
   Serial.begin(9600);
 
-  // by default, we'll generate the high voltage from the 3.3v line internally! (neat!)
-  oled.begin(SH1106_SWITCHCAPVCC, 0x3C);  // initialize with the I2C addr 0x3D (for the 128x64)
-  // Start the display with the appropriate I2C address
+  //oled.begin(SSD1306_SWITCHCAPVCC, 0x3D);  // select 3C or 3D (set your OLED I2C address)
+  oled.begin(SH1106_SWITCHCAPVCC, OLED_I2C_ADDRESS);  // use this when SH1106 
+
+
   /*
   if (!oled.begin(SSD1306_SWITCHCAPVCC, SSD1306_I2C_ADDRESS)) {
     Serial.println(F("SSD1306 allocation failed"));
@@ -89,6 +102,7 @@ void setup()
 
 void loop() 
 {
+  
 /***********************************************************************************************/
         /*Multi-Meter Code*/
 Select_Mux(device_selected, range_selected);  //Choose device
@@ -231,7 +245,6 @@ switch (device_selected)
   
 /**************************************************************************************************/
                 /*OLED Main Menu*/
-  /* OLED Main Menu */
   oled.clearDisplay(); // Clear the display before drawing each frame
   switch (selected_menu) {
       case MainMenu:
@@ -239,9 +252,9 @@ switch (device_selected)
           oled.drawBitmap(0, 0, epd_bitmap_bg, SCREEN_WIDTH, SCREEN_HEIGHT, TEXT_COLOR);
 
           // Draw Menu Items
-          drawMenuItem(15, menu_items[item_sel_previous], bitmap_arr[item_sel_previous]); // Menu Item 1
-          drawMenuItem(37, menu_items[item_selected], bitmap_arr[item_selected]); // Menu Item 2
-          drawMenuItem(59, menu_items[item_sel_next], bitmap_arr[item_sel_next]); // Menu Item 3
+          drawMenuItem(15, menu_items[item_sel_previous], item_sel_previous); // Menu Item 1
+          drawMenuItem(37, menu_items[item_selected], item_selected); // Menu Item 2
+          drawMenuItem(59, menu_items[item_sel_next], item_sel_next); // Menu Item 3
           break;
 
       case VoltmeterMenu:

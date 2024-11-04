@@ -1,21 +1,45 @@
-#include "U8glib.h"
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include "Adafruit_SH1106.h"
 #include "bitmaps.h"
 #include "application.h"
 #include "Multi_Metre_Sig.h"
-#include "Osci.h"
-#include <stdint.h>
+//#include "Osci.h"
+#include "eerom_map.h"
+//#include <stdint.h>
 #include <stdlib.h>
 
-U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_DEV_0 | U8G_I2C_OPT_NO_ACK | U8G_I2C_OPT_FAST); // Fast I2C / TWI
-// U8GLIB_SSD1306_128X64 u8g(13, 11, 8, 9, 10); // SPI connection
-// for SPI connection, use this wiring:
-// GND > GND
-// VCC > 5V
-// SCL > 13
-// SDA > 11
-// RES > 10
-// DC > 9
-// CS > 8
+
+// OLED display width and height, in pixels
+//OLED Definitions
+#define SCREEN_WIDTH      (128)   // OLED display width
+#define SCREEN_HEIGHT     (64)    // OLED display height
+#define OLED_RESET        (-1)    // Reset pin # (or -1 if sharing Arduino reset pin)
+#define OLED_I2C_ADDRESS  (0x3C)
+
+// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
+//Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);   // device name is oled
+Adafruit_SH1106 oled(OLED_RESET);        // use this when SH1106
+
+// Define constants for text size and color
+#define TEXT_SIZE 1
+#define TEXT_COLOR WHITE
+
+// Function to draw a menu item
+void drawMenuItem(int y_position, const char* item_text, const int index) {
+    // Buffer to hold the bitmap read from EEPROM
+    uint8_t bitmapBuffer[BIT_MAP_SIZE];
+    oled.setTextSize(TEXT_SIZE);
+    oled.setTextColor(TEXT_COLOR);
+    oled.setCursor(26, y_position-8);
+    oled.print(item_text);
+    readBitmapFromEEPROM(bitmapBuffer, index, BIT_MAP_SIZE);
+    //oled.drawBitmap(3, y_position - 13, item_bitmap, 16, 16, TEXT_COLOR); // Adjusted y position for bitmap
+    oled.drawBitmap(3, y_position - 13,  bitmapBuffer, 16, 16, TEXT_COLOR); // Adjusted y position for bitmap
+    delay(1);
+    
+}
 
 char menu_items [6] [MAX_ITEM_LENGTH] = {
   {"Voltmeter"},
@@ -54,8 +78,15 @@ float device_reading = 0;
 void setup()
 {
   MM_Init();
+  Serial.begin(9600);
 
-  u8g.setColorIndex(1);  // set the color to white
+  //oled.begin(SSD1306_SWITCHCAPVCC, 0x3D);  // select 3C or 3D (set your OLED I2C address)
+  oled.begin(SH1106_SWITCHCAPVCC, OLED_I2C_ADDRESS);  // use this when SH1106 
+
+  oled.clearDisplay();
+  oled.display();  // Initial display update
+  // Set the text color to white
+  oled.setTextColor(WHITE);
 
   // define pins for buttons
   // INPUT_PULLUP means the button is HIGH when not pressed, and LOW when pressed
@@ -63,11 +94,16 @@ void setup()
   pinMode(BUTTON_UP_PIN, INPUT_PULLUP); // up button
   pinMode(BUTTON_SELECT_PIN, INPUT_PULLUP); // select button
   pinMode(BUTTON_DOWN_PIN, INPUT_PULLUP); // down button
-  Osci_Init();
+  
+
+  //Osci_Init();
 }
 
 void loop() 
 {
+  // Buffer to hold the bitmap read from EEPROM
+  //uint8_t bitmapBuffer[BIT_MAP_SIZE];
+
   // Updates number of items according to selected menu
   switch (selected_menu)
   {
@@ -253,77 +289,88 @@ itoa(device_reading, reading_arr,10); //Change reading to str to be printed on s
   
 /**************************************************************************************************/
                 /*OLED Main Menu*/
-  u8g.firstPage();
-  do
-  {
+    oled.clearDisplay(); // Clear the display before drawing each frame
     switch (selected_menu)
     {
       case MainMenu:
         // Selection box and scroll bar
-        u8g.drawBitmapP(0, 0, 128/8, 64, epd_bitmap_bg);
+        oled.drawBitmap(0, 0, epd_bitmap_bg, SCREEN_WIDTH, SCREEN_HEIGHT, TEXT_COLOR);
 
-        //Menu Item 1
-        u8g.setFont(u8g_font_7x14);
-        u8g.drawStr(26,15, menu_items[item_sel_previous]);
-        u8g.drawBitmapP(3, 2, 16/8, 16, bitmap_arr[item_sel_previous]);
+        // Draw Menu Items
+        drawMenuItem(15, menu_items[item_sel_previous], item_sel_previous); // Menu Item 1
+        drawMenuItem(37, menu_items[item_selected], item_selected);         // Menu Item 2
+        drawMenuItem(59, menu_items[item_sel_next], item_sel_next);         // Menu Item 3
 
-        //Menu Item 2
-        u8g.setFont(u8g_font_7x14B);
-        u8g.drawStr(26,37, menu_items[item_selected]);
-        u8g.drawBitmapP(3, 24, 16/8, 16, bitmap_arr[item_selected]);
-
-        //Menu Item 3
-        u8g.setFont(u8g_font_7x14);
-        u8g.drawStr(26,59, menu_items[item_sel_next]);
-        u8g.drawBitmapP(3, 46, 16/8, 16, bitmap_arr[item_sel_next]);
       break;
 
       case VoltmeterMenu:
-      
-      u8g.setFont(u8g_font_7x14B);
-      u8g.drawStr(26,37, "Voltmeter Reading");
-      u8g.setFont(u8g_font_7x14);
-      u8g.drawStr(26,59, reading_arr);
-      //Voltmeter Menu code
-
-      break;
-
-      case AmmeterMenu:
-      
+      /*
       u8g.setFont(u8g_font_7x14B);
       u8g.drawStr(26,37, "Ammeter Reading");
       u8g.setFont(u8g_font_7x14);
       u8g.drawStr(26,59, reading_arr);
-      //Ammeter Menu code
+      */
 
+      //Voltmeter Menu code
+      oled.setTextSize(TEXT_SIZE);      // Keep default text size
+      oled.setTextColor(WHITE);
+      oled.setCursor(26, 37);           // Set position
+      oled.print("Voltmeter Reading");  // Display text
+      oled.setCursor(26, 59);           // Set position
+      oled.print(reading_arr);          // Display text  
+
+      break;
+
+      case AmmeterMenu:
+      //Osci_Run();
+
+      //Ammeter Menu code
+      oled.setTextSize(TEXT_SIZE);      // Keep default text size
+      oled.setTextColor(WHITE);
+      oled.setCursor(26, 37);           // Set position
+      oled.print("Ammeter Reading");    // Display text
+      oled.setCursor(26, 59);           // Set position
+      oled.print(reading_arr);          // Display text
+      
       break;
 
       case OhmmeterMenu:
       //Ohmmeter Menu Code
-      u8g.setFont(u8g_font_7x14B);
-      u8g.drawStr(26,37, "Ohmmeter Reading");
-      u8g.setFont(u8g_font_7x14);
-      u8g.drawStr(26,59, reading_arr);
+      oled.setTextSize(TEXT_SIZE);      // Keep default text size
+      oled.setTextColor(WHITE);
+      oled.setCursor(26, 37);           // Set position
+      oled.print("Ohmmeter Reading");   // Display text
+      oled.setCursor(26, 59);           // Set position
+      oled.print(reading_arr);          // Display text
 
       break;
 
       case SigGenMenu:
       // Selection box and scroll bar
-        u8g.drawBitmapP(0, 0, 128/8, 64, epd_bitmap_bg);
+      oled.drawBitmap(0, 0, epd_bitmap_bg, SCREEN_WIDTH, SCREEN_HEIGHT, TEXT_COLOR);
+      //u8g.drawBitmapP(0, 0, 128/8, 64, epd_bitmap_bg);
 
         
-      //Signal Generator Menu Code
-      //Menu Item 1
-        u8g.setFont(u8g_font_7x14);
-        u8g.drawStr(26,15, sig_menu_items[item_sel_previous]);
+        //Signal Generator Menu Code
+        //Menu Item 1
+        oled.setTextSize(TEXT_SIZE);                 // Keep default text size
+        oled.setTextColor(WHITE);
+        oled.setCursor(26, 15);                      // Set position
+        oled.print(sig_menu_items[item_sel_previous]);   // Display text
+        //u8g.setFont(u8g_font_7x14);
+        //u8g.drawStr(26,15, sig_menu_items[item_sel_previous]);
 
         //Menu Item 2
-        u8g.setFont(u8g_font_7x14B);
-        u8g.drawStr(26,37, sig_menu_items[item_selected]);
+        oled.setTextSize(TEXT_SIZE);                 // Keep default text size
+        oled.setTextColor(WHITE);
+        oled.setCursor(26, 37);                      // Set position
+        oled.print(sig_menu_items[item_selected]);   // Display text
 
         //Menu Item 3
-        u8g.setFont(u8g_font_7x14);
-        u8g.drawStr(26,59, sig_menu_items[item_sel_next]);
+        oled.setTextSize(TEXT_SIZE);                 // Keep default text size
+        oled.setTextColor(WHITE);
+        oled.setCursor(26,59);                       // Set position
+        oled.print(sig_menu_items[item_sel_next]);   // Display text
 
       break;
 
@@ -332,6 +379,9 @@ itoa(device_reading, reading_arr,10); //Change reading to str to be printed on s
 
       break;
     }
+    
+  oled.display(); // Update the display with the new content
+  delay(50); // Optional: Delay for stability or to control the refresh rate
 
-  } while(u8g.nextPage());
+  
 }

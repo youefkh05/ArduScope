@@ -25,7 +25,8 @@ However, SH1106 driver don't provide several functions such as scroll commands.
 
 
 *********************************************************************/
-
+#ifndef ADAFRUIT_SH1106_H
+#define ADAFRUIT_SH1106_H
 #if ARDUINO >= 100
  #include "Arduino.h"
  #define WIRE_WRITE Wire.write
@@ -178,3 +179,5 @@ class Adafruit_SH1106 : public Adafruit_GFX {
   inline void drawFastHLineInternal(int16_t x, int16_t y, int16_t w, uint16_t color) __attribute__((always_inline));
 
 };
+
+#endif /*   ADAFRUIT_SH1106_H   */

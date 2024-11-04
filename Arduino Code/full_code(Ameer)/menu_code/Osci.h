@@ -9,10 +9,10 @@
 #define OSCI_H
 
 /*  Include */
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-//#include <Adafruit_SSD1306.h>
-#include "Adafruit_SH1106.h"   // https://github.com/wonho-maker/Adafruit_SH1106         
+  #include <Wire.h>
+  #include <Adafruit_GFX.h>
+  //#include <Adafruit_SSD1306.h>
+  #include "Adafruit_SH1106.h"   // https://github.com/wonho-maker/Adafruit_SH1106         
 //#include <EEPROM.h>
 
 //OLED Definitions
