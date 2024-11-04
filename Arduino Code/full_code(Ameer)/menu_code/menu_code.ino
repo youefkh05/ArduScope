@@ -214,28 +214,34 @@ itoa(device_reading, reading_arr,10); //Change reading to str to be printed on s
 
             case 3:
               selected_menu = SigGenMenu;
+              item_selected = 0
               break;
 
             case 4:
               selected_menu = ConfigMenu;
+              item_selected = 0
               break;
           }
         break; // End of Case MainMenu ********************************************************************************
 
         case VoltmeterMenu:
           selected_menu = MainMenu;
+          item_selected = 0
           break; // End of Case Voltmeter ********************************************************************************
 
         case AmmeterMenu:
           selected_menu = MainMenu;
+          item_selected = 0
           break;  // End of Case Ammeter ********************************************************************************
 
         case OhmmeterMenu:
           selected_menu = MainMenu;
+          item_selected = 0
           break;  // End of Case Ohmmeter ********************************************************************************
 
         case SigGenMenu:
           selected_menu = MainMenu;
+          item_selected = 0
           break;  // End of Case SigGen ********************************************************************************
 
         case ConfigMenu:
