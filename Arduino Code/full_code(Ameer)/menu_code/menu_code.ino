@@ -5,7 +5,7 @@
 #include "bitmaps.h"
 #include "application.h"
 #include "Multi_Metre_Sig.h"
-//#include "Osci.h"
+#include "Osci.h"
 #include "eerom_map.h"
 //#include <stdint.h>
 #include <stdlib.h>
@@ -20,7 +20,7 @@
 
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 //Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);   // device name is oled
-Adafruit_SH1106 oled(OLED_RESET);        // use this when SH1106
+extern Adafruit_SH1106 oled;        // use this when SH1106
 
 // Define constants for text size and color
 #define TEXT_SIZE 1
@@ -96,7 +96,7 @@ void setup()
   pinMode(BUTTON_DOWN_PIN, INPUT_PULLUP); // down button
   
 
-  //Osci_Init();
+  Osci_Init();
 }
 
 void loop() 
