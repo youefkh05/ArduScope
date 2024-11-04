@@ -4,14 +4,14 @@
 void setup() {
     // Initialize serial for debugging
     Serial.begin(9600);
-    /*
+    
     // Write each bitmap to EEPROM
     writeBitmapToEEPROM(sig_gen_bitmap,3 , BIT_MAP_SIZE);
     writeBitmapToEEPROM(volt_bitmap,0 , BIT_MAP_SIZE);
     writeBitmapToEEPROM(amm_bitmap,1 , BIT_MAP_SIZE);
     writeBitmapToEEPROM(ohm_bitmap,2 , BIT_MAP_SIZE);
-    //writeBitmapToEEPROM(config_bitmap ,4 , BIT_MAP_SIZE);
-    */  
+    writeBitmapToEEPROM(config_bitmap ,4 , BIT_MAP_SIZE);
+    
     
     delay(3000);
     // Buffer to hold the bitmap read from EEPROM
