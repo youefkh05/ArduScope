@@ -15,12 +15,14 @@
   #include "Adafruit_SH1106.h"   // https://github.com/wonho-maker/Adafruit_SH1106         
 //#include <EEPROM.h>
 
+// OLED display width and height, in pixels
 //OLED Definitions
-#define SCREEN_WIDTH 128                // OLED display width
-#define SCREEN_HEIGHT 64                // OLED display height
-#define REC_LENG 200                    // size of wave data buffer
-#define MIN_TRIG_SWING 5                // minimum trigger swing.(Display "Unsync" if swing smaller than this value
-#define OLED_RESET     -1      // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_WIDTH      (128)   // OLED display width
+#define SCREEN_HEIGHT     (64)    // OLED display height
+#define OLED_RESET        (-1)    // Reset pin # (or -1 if sharing Arduino reset pin)
+#define REC_LENG          (200)   // size of wave data buffer
+#define MIN_TRIG_SWING    (5)     // minimum trigger swing.(Display "Unsync" if swing smaller than this value
+#define OLED_I2C_ADDRESS  (0x3C)
 
 
 //Pins Number

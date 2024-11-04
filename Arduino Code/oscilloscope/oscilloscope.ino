@@ -20,7 +20,7 @@ void loop() {
   delay(1500);
   oled.clearDisplay();
   oled.setTextSize(1);      
-   Osci_Run();
+   //Osci_Run();
 
      oled.clearDisplay();
   oled.setTextSize(1);                    // at double size character

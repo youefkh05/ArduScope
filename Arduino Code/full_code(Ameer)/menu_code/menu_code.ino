@@ -1,6 +1,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
+#include <avr/pgmspace.h>
 #include "Adafruit_SH1106.h"
 #include "bitmaps.h"
 #include "application.h"
@@ -10,38 +11,12 @@
 //#include <stdint.h>
 #include <stdlib.h>
 
+extern Adafruit_SH1106 oled;        // oled handeler
 
-// OLED display width and height, in pixels
-//OLED Definitions
-#define SCREEN_WIDTH      (128)   // OLED display width
-#define SCREEN_HEIGHT     (64)    // OLED display height
-#define OLED_RESET        (-1)    // Reset pin # (or -1 if sharing Arduino reset pin)
-#define OLED_I2C_ADDRESS  (0x3C)
+#define MENU_ITEMS_TYPE       (1)
+#define SIG_MENU_ITEMS_TYPE   (2)
 
-// Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
-//Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);   // device name is oled
-extern Adafruit_SH1106 oled;        // use this when SH1106
-
-// Define constants for text size and color
-#define TEXT_SIZE 1
-#define TEXT_COLOR WHITE
-
-// Function to draw a menu item
-void drawMenuItem(int y_position, const char* item_text, const int index) {
-    // Buffer to hold the bitmap read from EEPROM
-    uint8_t bitmapBuffer[BIT_MAP_SIZE];
-    oled.setTextSize(TEXT_SIZE);
-    oled.setTextColor(TEXT_COLOR);
-    oled.setCursor(26, y_position-8);
-    oled.print(item_text);
-    readBitmapFromEEPROM(bitmapBuffer, index, BIT_MAP_SIZE);
-    //oled.drawBitmap(3, y_position - 13, item_bitmap, 16, 16, TEXT_COLOR); // Adjusted y position for bitmap
-    oled.drawBitmap(3, y_position - 13,  bitmapBuffer, 16, 16, TEXT_COLOR); // Adjusted y position for bitmap
-    delay(1);
-    
-}
-
-char menu_items [6] [MAX_ITEM_LENGTH] = {
+const char menu_items [6] [MAX_ITEM_LENGTH] PROGMEM  = {
   {"Voltmeter"},
   {"Ammeter"},
   {"Ohmmeter"},
@@ -50,12 +25,66 @@ char menu_items [6] [MAX_ITEM_LENGTH] = {
   {"Config"}
 };
 
-char sig_menu_items [4] [MAX_ITEM_LENGTH] = {
-  {"Off"},
-  {"Square"},
-  {"Triangular"},
-  {"Sine Wave"}
+// Your menu items stored in PROGMEM
+const char sig_menu_items[4] [MAX_ITEM_LENGTH] PROGMEM = {
+    {"Off"},
+    {"Square"},
+    {"Triangular"},
+    {"Sine Wave"}
 };
+
+// Function to read a string from PROGMEM
+void getSignalMenuItem(uint8_t index, char *buffer, size_t bufferSize) {
+    if (index < 4) { // Adjust the range according to your items count
+        strncpy_P(buffer, (PGM_P)&sig_menu_items[index], bufferSize);
+        buffer[bufferSize - 1] = '\0'; // Ensure null-termination
+    }
+}
+
+// Function to read a string from PROGMEM
+void getMenuItem(uint8_t index, char *buffer, size_t bufferSize) {
+    // Make sure the index is within bounds
+    if (index < 6) {
+        // Read the string from PROGMEM into the buffer
+        strncpy_P(buffer, (PGM_P)&menu_items[index], bufferSize);
+        buffer[bufferSize - 1] = '\0'; // Ensure null-termination
+    }
+}
+
+// Function to draw a menu item
+void drawMenuItem(int y_position, uint8_t index, uint8_t type) {
+  char itemText[MAX_ITEM_LENGTH];
+  switch(type){
+    case  MENU_ITEMS_TYPE :
+      // Buffer to hold the bitmap read from EEPROM
+      uint8_t bitmapBuffer[BIT_MAP_SIZE];
+      
+      getMenuItem(index, itemText, sizeof(itemText)); // Read from PROGMEM
+      //delay(1);
+      oled.setTextSize(TEXT_SIZE);
+      oled.setTextColor(TEXT_COLOR);
+      oled.setCursor(26, y_position-8);
+      oled.print(itemText);
+      readBitmapFromEEPROM(bitmapBuffer, index, BIT_MAP_SIZE);
+      //oled.drawBitmap(3, y_position - 13, item_bitmap, 16, 16, TEXT_COLOR); // Adjusted y position for bitmap
+      oled.drawBitmap(3, y_position - 13,  bitmapBuffer, 16, 16, TEXT_COLOR); // Adjusted y position for bitmap
+      delay(1);
+    break;
+
+    case SIG_MENU_ITEMS_TYPE:
+      getSignalMenuItem(index, itemText, sizeof(itemText)); // Read from PROGMEM
+
+      oled.setTextSize(TEXT_SIZE);
+      oled.setTextColor(TEXT_COLOR);
+      oled.setCursor(26, y_position-8);
+      oled.print(itemText);
+
+    break;
+  }
+    
+    
+}
+
 
 flag_type flags = { };
 
@@ -80,7 +109,6 @@ void setup()
   MM_Init();
   Serial.begin(9600);
 
-  //oled.begin(SSD1306_SWITCHCAPVCC, 0x3D);  // select 3C or 3D (set your OLED I2C address)
   oled.begin(SH1106_SWITCHCAPVCC, OLED_I2C_ADDRESS);  // use this when SH1106 
 
   oled.clearDisplay();
@@ -214,34 +242,34 @@ itoa(device_reading, reading_arr,10); //Change reading to str to be printed on s
 
             case 3:
               selected_menu = SigGenMenu;
-              item_selected = 0
+              item_selected = 0;
               break;
 
             case 4:
               selected_menu = ConfigMenu;
-              item_selected = 0
+              item_selected = 0;
               break;
           }
         break; // End of Case MainMenu ********************************************************************************
 
         case VoltmeterMenu:
           selected_menu = MainMenu;
-          item_selected = 0
+          item_selected = 0;
           break; // End of Case Voltmeter ********************************************************************************
 
         case AmmeterMenu:
           selected_menu = MainMenu;
-          item_selected = 0
+          item_selected = 0;
           break;  // End of Case Ammeter ********************************************************************************
 
         case OhmmeterMenu:
           selected_menu = MainMenu;
-          item_selected = 0
+          item_selected = 0;
           break;  // End of Case Ohmmeter ********************************************************************************
 
         case SigGenMenu:
           selected_menu = MainMenu;
-          item_selected = 0
+          item_selected = 0;
           break;  // End of Case SigGen ********************************************************************************
 
         case ConfigMenu:
@@ -303,9 +331,9 @@ itoa(device_reading, reading_arr,10); //Change reading to str to be printed on s
         oled.drawBitmap(0, 0, epd_bitmap_bg, SCREEN_WIDTH, SCREEN_HEIGHT, TEXT_COLOR);
 
         // Draw Menu Items
-        drawMenuItem(15, menu_items[item_sel_previous], item_sel_previous); // Menu Item 1
-        drawMenuItem(37, menu_items[item_selected], item_selected);         // Menu Item 2
-        drawMenuItem(59, menu_items[item_sel_next], item_sel_next);         // Menu Item 3
+        drawMenuItem(15,  item_sel_previous, MENU_ITEMS_TYPE ); // Menu Item 1
+        drawMenuItem(37,  item_selected, MENU_ITEMS_TYPE );         // Menu Item 2
+        drawMenuItem(59,  item_sel_next, MENU_ITEMS_TYPE );         // Menu Item 3
 
       break;
 
@@ -356,7 +384,11 @@ itoa(device_reading, reading_arr,10); //Change reading to str to be printed on s
       oled.drawBitmap(0, 0, epd_bitmap_bg, SCREEN_WIDTH, SCREEN_HEIGHT, TEXT_COLOR);
       //u8g.drawBitmapP(0, 0, 128/8, 64, epd_bitmap_bg);
 
-        
+        drawMenuItem(15,  item_sel_previous, SIG_MENU_ITEMS_TYPE );     // Menu Item 1
+        drawMenuItem(37,  item_selected, SIG_MENU_ITEMS_TYPE );         // Menu Item 2
+        drawMenuItem(59,  item_sel_next, SIG_MENU_ITEMS_TYPE );         // Menu Item 3
+
+        /*
         //Signal Generator Menu Code
         //Menu Item 1
         oled.setTextSize(TEXT_SIZE);                 // Keep default text size
@@ -377,6 +409,7 @@ itoa(device_reading, reading_arr,10); //Change reading to str to be printed on s
         oled.setTextColor(WHITE);
         oled.setCursor(26,59);                       // Set position
         oled.print(sig_menu_items[item_sel_next]);   // Display text
+        */
 
       break;
 

@@ -45,7 +45,7 @@ boolean trigSync;              // flag of trigger detected
 //int att10x;                    // 10x attenetor ON (effective when 1)
 
 float waveFreq;                // frequency (Hz)
-int waveDuty;                // duty ratio (%)
+char waveDuty;                // duty ratio (%)
 
 void Osci_Init(void)
 {
@@ -333,8 +333,9 @@ static void dataAnalize() {                       // get various information fro
   if ((dataMax - dataMin) <= MIN_TRIG_SWING) {    // amplitude of the waveform smaller than the specified value
     trigSync = false;                             // set Unsync display flag
   }
-  freqDuty();
+  //freqDuty();
 }
+
 
 static void freqDuty() {                               // detect frequency and duty cycle value from waveform data
   int swingCenter;                              // center of wave (half of p-p)
@@ -388,6 +389,7 @@ static void freqDuty() {                               // detect frequency and d
   waveFreq = 1.0 / ((pgm_read_float(hRangeValue + hRange) * pPeriod) / 25.0); // frequency
   waveDuty = 100.0 * pWidth / pPeriod;                                      // duty ratio
 }
+
 
 static int sum3(int k) {       // Sum of before and after and own value
   int m = waveBuff[k - 1] + waveBuff[k] + waveBuff[k + 1];
@@ -490,9 +492,9 @@ static void dispInf() {                          // Display of various informati
       oled.print(F("kH"));
     }
     oled.fillRect(96, 21, 25, 10, BLACK);    // erase Freq area (as small as possible)
-    oled.setCursor(105, 23);                  // set location
-    oled.print(waveDuty, 1);                 // display duty (High level ratio) in %
-    oled.print(F("%"));
+    //oled.setCursor(105, 23);                  // set location
+    //oled.print(waveDuty, 1);                 // display duty (High level ratio) in %
+    //oled.print(F("%"));
   }
 }
 

@@ -7,6 +7,10 @@
 
 #define MAX_ITEM_LENGTH     (10)
 
+// Define constants for text size and color
+#define TEXT_SIZE 1
+#define TEXT_COLOR WHITE
+
 //  Flags type
 typedef struct flag_type
 {
