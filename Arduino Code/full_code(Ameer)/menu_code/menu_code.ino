@@ -9,7 +9,7 @@
 #include "Osci.h"
 #include "eerom_map.h"
 //#include <stdint.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 
 extern Adafruit_SH1106 oled;        // oled handeler
 

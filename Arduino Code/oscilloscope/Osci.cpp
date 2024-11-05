@@ -6,6 +6,7 @@
 //float LSB_5V = 0.00566826;      // sensivity coefficient of 5V range. std=0.00563965 1.1*630/(1024*120)
 //float lsb50V = 0.05243212;     // sensivity coefficient of 50V range. std=0.0512898 1.1*520.91/(1024*10.91)
 
+
 // Declaration for an SSD1306 display connected to I2C (SDA, SCL pins)
 //Adafruit_SSD1306 oled(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);   // device name is oled
 Adafruit_SH1106 oled(OLED_RESET);        // use this when SH1106
@@ -18,13 +19,6 @@ const char hstring_table[MAX_HRANGE] [6] PROGMEM = {"200ms", " 50ms", " 10ms", "
 const PROGMEM float hRangeValue[] = { 0.2, 0.05, 0.01, 0.002, 0.5e-3, 0.2e-3}; // horizontal range value in second. ( = 25pix on screen)
 flag_type flags = { };
 
-int waveBuff[REC_LENG];        // wave form buffer (RAM remaining capacity is barely)
-char chrBuff[8];               // display string buffer
-char hScale[] = "xxxAs";       // horizontal scale character
-char vScale[] = "xxxx";        // vartical scale
-
-volatile char vRange;                   // V-range number 0:5V,   1:2V,  2:1V,  3:0.5V,  4:0.2V
-volatile char hRange;                   // H-range nubmer 0:200ms,  1:50ms, 2:10ms, 3;2ms, 4:500us, 5;200us
 //volatile char trigD;                  // trigger slope flag,     0:positive 1:negative
 volatile boolean scopeP;                // operation scope position number. 0:Veratical, 1:Hrizontal, 2:Trigger slope
 volatile boolean hold = false;          // hold flag
@@ -33,25 +27,11 @@ volatile boolean switchPushed = false;  // flag of switch pusshed !
 //volatile int saveTimer;               // remaining time for saving EEPROM
 //int timeExec;                         // approx. execution time of current range setting (ms)
 
-int dataMin;                   // buffer minimum value (smallest=0)
-int dataMax;                   //        maximum value (largest=1023)
-int dataAve;                   // 10 x average value (use 10x value to keep accuracy. so, max=10230)
-int rangeMax;                  // buffer value to graph full swing
-int rangeMin;                  // buffer value of graph botto
-int rangeMaxDisp;              // display value of max. (100x value)
-int rangeMinDisp;              // display value if min.
-int trigP;                     // trigger position pointer on data buffer
-boolean trigSync;              // flag of trigger detected
-//int att10x;                    // 10x attenetor ON (effective when 1)
-
-float waveFreq;                // frequency (Hz)
-int waveDuty;                // duty ratio (%)
+volatile char vRange;                   // V-range number 0:5V,   1:2V,  2:1V,  3:0.5V,  4:0.2V
+volatile char hRange;                   // H-range nubmer 0:200ms,  1:50ms, 2:10ms, 3;2ms, 4:500us, 5;200us
 
 void Osci_Init(void)
 {
-  hold = false;          // hold flag
-  exitflag = false;      // hold flag
-  switchPushed = false;  // flag of switch pusshed !
   pinMode(Osci_Input_Bot, INPUT_PULLUP);             // button pussed interrupt (int.0 IRQ)
   pinMode(Select_Bot, INPUT_PULLUP);          // Select button
   pinMode(Up_Bot , INPUT_PULLUP);             // Up
@@ -71,15 +51,30 @@ void Osci_Init(void)
   attachInterrupt(0, pin2IRQ, FALLING); // activate IRQ at falling edge mode
   //attachInterrupt(1, pin3IRQ, LOW);
 
-
-   vRange=1;             // V-range number 0:5V,   1:2V,  2:1V,  3:0.5V,  4:0.2V
-   hRange=1;             // H-range nubmer 0:200ms,  1:50ms, 2:10ms, 3;2ms, 4:500us, 5;200us
-   //trigD=1;            // trigger slope flag,     0:positive 1:negative
-   scopeP=false;
 }
 
 
 void Osci_Run(void) {
+
+  int waveBuff[REC_LENG];        // wave form buffer (RAM remaining capacity is barely)
+  char chrBuff[8];               // display string buffer
+  char hScale[] = "xxxAs";       // horizontal scale character
+  char vScale[] = "xxxx";        // vartical scale
+
+
+  int dataMin;                   // buffer minimum value (smallest=0)
+  int dataMax;                   //        maximum value (largest=1023)
+  int dataAve;                   // 10 x average value (use 10x value to keep accuracy. so, max=10230)
+  int rangeMax;                  // buffer value to graph full swing
+  int rangeMin;                  // buffer value of graph botto
+  int rangeMaxDisp;              // display value of max. (100x value)
+  int rangeMinDisp;              // display value if min.
+  int trigP;                     // trigger position pointer on data buffer
+  boolean trigSync;              // flag of trigger detected
+  //int att10x;                    // 10x attenetor ON (effective when 1)
+
+  float waveFreq;                // frequency (Hz)
+  int waveDuty;                // duty ratio (%)
 
   hold = false;          // hold flag
   exitflag = false;      // hold flag
@@ -93,21 +88,24 @@ void Osci_Run(void) {
   startScreen(); // display start message
   flags.button_select_f = 0;
   
+  
   while(flags.button_select_f == 0){
-    setConditions();                      // set measurment conditions
-    readWave();                           // read wave form and store into buffer memory
-    setConditions();                      // set measurment conditions again (reflect change during measure)
-    dataAnalize();                        // analize data
+    setConditions(hScale,vScale,rangeMax,rangeMaxDisp,rangeMin,rangeMinDisp);                      // set measurment conditions
+    readWave(waveBuff);     // read wave form and store into buffer memory
+    setConditions(hScale,vScale,rangeMax,rangeMaxDisp,rangeMin,rangeMinDisp);            // set measurment conditions again (reflect change during measure)
+    dataAnalize(dataMin,dataMax,dataAve,waveBuff,trigP,trigSync,waveFreq,waveDuty);                        // analize data
     writeCommonImage();                   // write fixed screen image (2.6ms)
-    plotData();                           // plot waveform (10-18ms)
-    dispInf();                            // display information (6.5-8.5ms)
+    plotData(waveBuff,rangeMax,rangeMaxDisp,rangeMin,rangeMinDisp,trigP,trigSync,waveFreq,waveDuty);                           // plot waveform (10-18ms)
+    dispInf(hScale, vScale,dataMin,dataMax,dataAve,chrBuff,rangeMax,rangeMaxDisp,rangeMin,rangeMinDisp,trigP,trigSync,waveFreq,waveDuty);                            // display information (6.5-8.5ms)
     oled.display();                       // send screen buffer to OLED (37ms)
     //saveEEPROM();                       // save settings to EEPROM if necessary
+    
+    
     while (hold == true) {                // wait if Hold flag ON
       dispHold();
       delay(10);                          // loop cycle speed = 60-470ms (buffer size = 200)
     }       
-
+    
     if((digitalRead(Exit_Bot) == LOW))
     {
       delay(30); // Rebounce Delay
@@ -126,7 +124,7 @@ void Osci_Run(void) {
   
 }
 
-static void setConditions() {           // measuring condition setting
+static void setConditions(char* hScale, char* vScale,int &rangeMax,int &rangeMaxDisp,int &rangeMin,int &rangeMinDisp) {           // measuring condition setting
   // get range name from PROGMEM
   strcpy_P(hScale, hstring_table[hRange]);  // H range name
   strcpy_P(vScale, vstring_table[vRange]);  // Directly read from PROGMEM
@@ -210,7 +208,7 @@ static void writeCommonImage() {                 // Common screen image drawing
   }
 }
 
-static void readWave() {                            // Record waveform to memory array
+static void readWave(int *waveBuff) {                            // Record waveform to memory array
   
   //if (att10x == 1) {                         // if 1/10 attenuator required
     //pinMode(12, OUTPUT);                     // assign attenuator controle pin to OUTPUT,
@@ -296,7 +294,7 @@ static void readWave() {                            // Record waveform to memory
   }
 }
 
-static void dataAnalize() {                       // get various information from wave form
+static void dataAnalize(int &dataMin,int &dataMax,int &dataAve,int *waveBuff,int &trigP,boolean &trigSync,float &waveFreq,int &waveDuty) {                       // get various information from wave form
   int d;
   long sum = 0;
 
@@ -333,10 +331,10 @@ static void dataAnalize() {                       // get various information fro
   if ((dataMax - dataMin) <= MIN_TRIG_SWING) {    // amplitude of the waveform smaller than the specified value
     trigSync = false;                             // set Unsync display flag
   }
-  freqDuty();
+  freqDuty(dataMin,dataMax,dataAve,waveFreq,waveDuty,waveBuff);
 }
 
-static void freqDuty() {                               // detect frequency and duty cycle value from waveform data
+static void freqDuty(int &dataMin,int &dataMax,int &dataAve,float &waveFreq,int &waveDuty,int *waveBuff) {                               // detect frequency and duty cycle value from waveform data
   int swingCenter;                              // center of wave (half of p-p)
   float p0 = 0;                                 // 1-st posi edge
   float p1 = 0;                                 // total length of cycles
@@ -358,8 +356,8 @@ static void freqDuty() {                               // detect frequency and d
 
   for (int i = 1; i < REC_LENG - 2; i++) {       // scan all over the buffer
     if (posiSerch == true) {   // posi slope (frequency serch)
-      if ((sum3(i) <= swingCenter) && (sum3(i + 1) > swingCenter)) {  // if across the center when rising (+-3data used to eliminate noize)
-        pFine = (float)(swingCenter - sum3(i)) / ((swingCenter - sum3(i)) + (sum3(i + 1) - swingCenter) );  // fine cross point calc.
+      if ((sum3(i,waveBuff) <= swingCenter) && (sum3(i + 1,waveBuff) > swingCenter)) {  // if across the center when rising (+-3data used to eliminate noize)
+        pFine = (float)(swingCenter - sum3(i,waveBuff)) / ((swingCenter - sum3(i,waveBuff)) + (sum3(i + 1,waveBuff) - swingCenter) );  // fine cross point calc.
         if (a0Detected == false) {               // if 1-st cross
           a0Detected = true;                     // set find flag
           p0 = i + pFine;                        // save this position as startposition
@@ -371,8 +369,8 @@ static void freqDuty() {                               // detect frequency and d
         posiSerch = false;
       }
     } else {   // nega slope serch (duration serch)
-      if ((sum3(i) >= swingCenter) && (sum3(i + 1) < swingCenter)) {  // if across the center when falling (+-3data used to eliminate noize)
-        pFine = (float)(sum3(i) - swingCenter) / ((sum3(i) - swingCenter) + (swingCenter - sum3(i + 1)) );
+      if ((sum3(i,waveBuff) >= swingCenter) && (sum3(i + 1,waveBuff) < swingCenter)) {  // if across the center when falling (+-3data used to eliminate noize)
+        pFine = (float)(sum3(i,waveBuff) - swingCenter) / ((sum3(i,waveBuff) - swingCenter) + (swingCenter - sum3(i + 1,waveBuff)) );
         if (a0Detected == true) {
           p2 = p2 + (i + pFine - lastPosiEdge);  // calucurate pulse width and accumurate it
           p2Count++;
@@ -389,7 +387,8 @@ static void freqDuty() {                               // detect frequency and d
   waveDuty = 100.0 * pWidth / pPeriod;                                      // duty ratio
 }
 
-static int sum3(int k) {       // Sum of before and after and own value
+
+static int sum3(int k,int *waveBuff) {       // Sum of before and after and own value
   int m = waveBuff[k - 1] + waveBuff[k] + waveBuff[k + 1];
   return m;
 }
@@ -398,13 +397,17 @@ static void startScreen() {                      // Staru up screen
   oled.clearDisplay();
   oled.setTextSize(1);                    // at double size character
   oled.setTextColor(WHITE);
-  oled.setCursor(40, 0);
-  oled.println(F("ArduScope1"));  
-  oled.setCursor(30, 20);
-  oled.println(F("Oscilloscope")); 
-  oled.setCursor(55, 42);            
-  oled.println(F(";)"));                
-  oled.display();                         
+  //for(int i=0;i++;i<=40){
+    oled.setCursor(40, 0);
+    oled.println(F("ArduScope"));  
+    oled.setCursor(30, 20);
+    oled.println(F("Oscilloscope")); 
+    oled.setCursor(55, 42);            
+    oled.println(F(";)"));                
+    oled.display();
+    delay(50);           
+  //}
+                
   delay(1500);
   oled.clearDisplay();
   oled.setTextSize(1);                    // After this, standard font size
@@ -417,7 +420,8 @@ static void dispHold() {                         // display "Hold"
   oled.display();                         //
 }
 
-static void dispInf() {                          // Display of various information
+static void dispInf(char* hScale, char* vScale,int &dataMin,int &dataMax,int &dataAve,char *chrBuff,
+int &rangeMax,int &rangeMaxDisp,int &rangeMin,int &rangeMinDisp,int &trigP,boolean &trigSync,float &waveFreq,int &waveDuty) {                          // Display of various information
   float voltage;
   // display vertical sensitivity
   oled.setCursor(2, 0);                   // around top left
@@ -496,7 +500,8 @@ static void dispInf() {                          // Display of various informati
   }
 }
 
-static void plotData() {                    // plot wave form on OLED
+static void plotData(int *waveBuff,int &rangeMax,int &rangeMaxDisp,int &rangeMin,int &rangeMinDisp,
+int &trigP,boolean &trigSync,float &waveFreq,int &waveDuty) {                    // plot wave form on OLED
   long y1, y2;
   for (int x = 0; x <= 98; x++) {
     y1 = map(waveBuff[x + trigP - 50], rangeMin, rangeMax, 63, 9); // convert to plot address
@@ -506,6 +511,7 @@ static void plotData() {                    // plot wave form on OLED
     oled.drawLine(x + 27, y1, x + 28, y2, WHITE);                  // connect between point
   }
 }
+
 /*
 static void saveEEPROM() {                    // Save the setting value in EEPROM after waiting a while after the button operation.
   if (saveTimer > 0) {                 // If the timer value is positive,
@@ -543,8 +549,6 @@ static void loadEEPROM() {                    // Read setting values from EEPROM
   }
   scopeP = x;
 }
-*/
-
 
 
 static void uuPinOutputLow(unsigned int d, unsigned int a) { // 指定ピンを出力、LOWに設定
@@ -554,6 +558,7 @@ static void uuPinOutputLow(unsigned int d, unsigned int a) { // 指定ピンを�
   x = d >> 8;     PORTB &= ~x; DDRB |= x;
   x = a & 0x003F; PORTC &= ~x; DDRC |= x;
 }
+*/
 
 static void pin2IRQ() {                   // Pin2(int.0) interrupr handler
   // Pin8,9,10,11 buttons are bundled with diodes and connected to Pin2.
@@ -605,6 +610,8 @@ static void pin2IRQ() {                   // Pin2(int.0) interrupr handler
     hold = ! hold;                 // revers the flag
   }
 }
+
+
 
 
 
