@@ -1,3 +1,6 @@
+#ifndef APPLICATION_H
+#define APPLICATION_H
+
 //#include <stdint.h>
 
 // Definitions
@@ -40,3 +43,5 @@ typedef enum sig_type
   Sine
 };
 */
+
+#endif /* APPLICATION_H*/

@@ -16,18 +16,18 @@
 //#include <EEPROM.h>
 
 //OLED Definitions
-#define SCREEN_WIDTH 128                // OLED display width
-#define SCREEN_HEIGHT 64                // OLED display height
-#define REC_LENG      200                    // size of wave data buffer
-#define MIN_TRIG_SWING 5                // minimum trigger swing.(Display "Unsync" if swing smaller than this value
-#define OLED_RESET     -1      // Reset pin # (or -1 if sharing Arduino reset pin)
-
+#define SCREEN_WIDTH      (128)   // OLED display width
+#define SCREEN_HEIGHT     (64)    // OLED display height
+#define OLED_RESET        (-1)    // Reset pin # (or -1 if sharing Arduino reset pin)
+#define REC_LENG          (200)   // size of wave data buffer
+#define MIN_TRIG_SWING    (5)     // minimum trigger swing.(Display "Unsync" if swing smaller than this value
+#define OLED_I2C_ADDRESS  (0x3C)
 
 //Pins Number
 #define   Osci_Input_Bot    (2)
-#define   Select_Bot        (5)
+#define   Select_Bot        (8)
 #define   Exit_Bot          (3)
-#define   Up_Bot            (6)
+#define   Up_Bot            (9)
 #define   Down_Bot          (10)
 #define   Hold_Bot          (11)
 #define   Osci_In           (A0)
