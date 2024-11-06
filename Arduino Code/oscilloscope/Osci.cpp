@@ -90,6 +90,7 @@ void Osci_Run(void) {
   
   
   while(flags1.button_select_f == 0){
+    
     setConditions(hScale,vScale,rangeMax,rangeMaxDisp,rangeMin,rangeMinDisp);                      // set measurment conditions
     readWave(waveBuff);     // read wave form and store into buffer memory
     setConditions(hScale,vScale,rangeMax,rangeMaxDisp,rangeMin,rangeMinDisp);            // set measurment conditions again (reflect change during measure)
@@ -120,181 +121,193 @@ void Osci_Run(void) {
     }
 
   }        
-  delay(100); // exit Delay                
+  analogReference(DEFAULT);  // Set the ADC reference to the default (AVCC or 5V/3.3V)
+
+  delay(500); // exit Delay                
   
 }
 
-static void setConditions(char* hScale, char* vScale,int &rangeMax,int &rangeMaxDisp,int &rangeMin,int &rangeMinDisp) {           // measuring condition setting
-  // get range name from PROGMEM
-  strcpy_P(hScale, hstring_table[hRange]);  // H range name
-  strcpy_P(vScale, vstring_table[vRange]);  // Directly read from PROGMEM
+  static void setConditions(char* hScale, char* vScale,int &rangeMax,int &rangeMaxDisp,int &rangeMin,int &rangeMinDisp) {           // measuring condition setting
+    // get range name from PROGMEM
+    strcpy_P(hScale, hstring_table[hRange]);  // H range name
+    strcpy_P(vScale, vstring_table[vRange]);  // Directly read from PROGMEM
 
-  switch (vRange) {              // setting of Vrange
-    case 0: {                    // 5V range
-        rangeMax = 5 / LSB_5V;    // set full scale pixcel count number
-        rangeMaxDisp = 500;
-        rangeMin = 0;
-        rangeMinDisp = 0;
-        //att10x = 0;              // no input attenuator
-        break;
-      }
-    case 1: {                    // 2V range
-        rangeMax = 2 / LSB_5V;    // set full scale pixcel count number
-        rangeMaxDisp = 200;
-        rangeMin = 0;
-        rangeMinDisp = 0;
-        //att10x = 0;              // no input attenuator
-        break;
-      }
-    case 2: {                    // 1V range
-        rangeMax = 1 / LSB_5V;    // set full scale pixcel count number
-        rangeMaxDisp = 100;
-        rangeMin = 0;
-        rangeMinDisp = 0;
-        //att10x = 0;              // no input attenuator
-        break;
-      }
-    case 3: {                    // 0.5V range
-        rangeMax = 0.5 / LSB_5V;  // set full scale pixcel count number
-        rangeMaxDisp = 50;
-        rangeMin = 0;
-        rangeMinDisp = 0;
-        //att10x = 0;              // no input attenuator
-        break;
-      }
-    case 4: {                    // 0.5V range
-        rangeMax = 0.2 / LSB_5V;  // set full scale pixcel count number
-        rangeMaxDisp = 20;
-        rangeMin = 0;
-        rangeMinDisp = 0;
-        //att10x = 0;              // no input attenuator
-        break;
-      }
-  }
-}
-
-static void writeCommonImage() {                 // Common screen image drawing
-  oled.clearDisplay();                    // erase all(0.4ms)
-  oled.setTextColor(WHITE);               // write in white character
-  oled.setCursor(85, 0);                  // Start at top-left corner
-  oled.println(F("av    v"));             // 1-st line fixed characters
-  oled.drawFastVLine(26, 9, 55, WHITE);   // left vartical line
-  oled.drawFastVLine(127, 9, 3, WHITE);   // right vrtical line up
-  oled.drawFastVLine(127, 61, 3, WHITE);  // right vrtical line bottom
-
-  oled.drawFastHLine(24, 9, 7, WHITE);    // Max value auxiliary mark
-  oled.drawFastHLine(24, 36, 2, WHITE);
-  oled.drawFastHLine(24, 63, 7, WHITE);
-
-  oled.drawFastHLine(51, 9, 3, WHITE);    // Max value auxiliary mark
-  oled.drawFastHLine(51, 63, 3, WHITE);
-
-  oled.drawFastHLine(76, 9, 3, WHITE);    // Max value auxiliary mark
-  oled.drawFastHLine(76, 63, 3, WHITE);
-
-  oled.drawFastHLine(101, 9, 3, WHITE);   // Max value auxiliary mark
-  oled.drawFastHLine(101, 63, 3, WHITE);
-
-  oled.drawFastHLine(123, 9, 5, WHITE);   // right side Max value auxiliary mark
-  oled.drawFastHLine(123, 63, 5, WHITE);
-
-  for (int x = 26; x <= 128; x += 5) {
-    oled.drawFastHLine(x, 36, 2, WHITE);  // Draw the center line (horizontal line) with a dotted line
-  }
-  for (int x = (127 - 25); x > 30; x -= 25) {
-    for (int y = 10; y < 63; y += 5) {
-      oled.drawFastVLine(x, y, 2, WHITE); // Draw 3 vertical lines with dotted lines
+    switch (vRange) {              // setting of Vrange
+      case 0: {                    // 5V range
+          rangeMax = 5 / LSB_5V;    // set full scale pixcel count number
+          rangeMaxDisp = 500;
+          rangeMin = 0;
+          rangeMinDisp = 0;
+          //att10x = 0;              // no input attenuator
+          break;
+        }
+      case 1: {                    // 2V range
+          rangeMax = 2 / LSB_5V;    // set full scale pixcel count number
+          rangeMaxDisp = 200;
+          rangeMin = 0;
+          rangeMinDisp = 0;
+          //att10x = 0;              // no input attenuator
+          break;
+        }
+      case 2: {                    // 1V range
+          rangeMax = 1 / LSB_5V;    // set full scale pixcel count number
+          rangeMaxDisp = 100;
+          rangeMin = 0;
+          rangeMinDisp = 0;
+          //att10x = 0;              // no input attenuator
+          break;
+        }
+      case 3: {                    // 0.5V range
+          rangeMax = 0.5 / LSB_5V;  // set full scale pixcel count number
+          rangeMaxDisp = 50;
+          rangeMin = 0;
+          rangeMinDisp = 0;
+          //att10x = 0;              // no input attenuator
+          break;
+        }
+      case 4: {                    // 0.5V range
+          rangeMax = 0.2 / LSB_5V;  // set full scale pixcel count number
+          rangeMaxDisp = 20;
+          rangeMin = 0;
+          rangeMinDisp = 0;
+          //att10x = 0;              // no input attenuator
+          break;
+        }
     }
-  }
 }
 
-static void readWave(int *waveBuff) {                            // Record waveform to memory array
-  
-  //if (att10x == 1) {                         // if 1/10 attenuator required
-    //pinMode(12, OUTPUT);                     // assign attenuator controle pin to OUTPUT,
-    //digitalWrite(12, LOW);                   // and output LOW (output 0V)
-  //} else {                                   // if not required
-    //pinMode(12, INPUT);                      // assign the pin input (Hi-z)
-  //}
-  switchPushed = false;                      // Clear switch operation flag
-  ADCSRA = ADCSRA & 0xf8;
-  switch (hRange) {                          // set recording conditions in accordance with the range number
-    case 0: {                                // 200ms range
-        //timeExec = 1600 + 60;                // Approximate execution time(ms) Used for countdown until saving to EEPROM
-        ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
-        for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(Osci_In);       // read and save approx 112us
-          delayMicroseconds(7888);           // timing adjustment
-          if (switchPushed == true) {        // if any switch touched
-            switchPushed = false;
-            break;                           // abandon record(this improve response)
-          }
-        }
-        break;
-      }
-    case 1: {                                // 50ms range
-        //timeExec = 400 + 60;                 // Approximate execution time(ms)
-        ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
-        for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(Osci_In);       // read and save approx 112us
-          // delayMicroseconds(1888);           // timing adjustmet
-          delayMicroseconds(1880);           // timing adjustmet tuned
+  static void writeCommonImage() {                 // Common screen image drawing
+    oled.clearDisplay();                    // erase all(0.4ms)
+    oled.setTextColor(WHITE);               // write in white character
+    oled.setCursor(85, 0);                  // Start at top-left corner
+    oled.println(F("av    v"));             // 1-st line fixed characters
+    oled.drawFastVLine(26, 9, 55, WHITE);   // left vartical line
+    oled.drawFastVLine(127, 9, 3, WHITE);   // right vrtical line up
+    oled.drawFastVLine(127, 61, 3, WHITE);  // right vrtical line bottom
 
-          if (switchPushed == true) {        // if any switch touched
-            break;                           // abandon record(this improve response)
-          }
-        }
-        break;
+    oled.drawFastHLine(24, 9, 7, WHITE);    // Max value auxiliary mark
+    oled.drawFastHLine(24, 36, 2, WHITE);
+    oled.drawFastHLine(24, 63, 7, WHITE);
+
+    oled.drawFastHLine(51, 9, 3, WHITE);    // Max value auxiliary mark
+    oled.drawFastHLine(51, 63, 3, WHITE);
+
+    oled.drawFastHLine(76, 9, 3, WHITE);    // Max value auxiliary mark
+    oled.drawFastHLine(76, 63, 3, WHITE);
+
+    oled.drawFastHLine(101, 9, 3, WHITE);   // Max value auxiliary mark
+    oled.drawFastHLine(101, 63, 3, WHITE);
+
+    oled.drawFastHLine(123, 9, 5, WHITE);   // right side Max value auxiliary mark
+    oled.drawFastHLine(123, 63, 5, WHITE);
+
+    for (int x = 26; x <= 128; x += 5) {
+      oled.drawFastHLine(x, 36, 2, WHITE);  // Draw the center line (horizontal line) with a dotted line
+    }
+    for (int x = (127 - 25); x > 30; x -= 25) {
+      for (int y = 10; y < 63; y += 5) {
+        oled.drawFastVLine(x, y, 2, WHITE); // Draw 3 vertical lines with dotted lines
       }
-    case 2: {                                // 10ms range
-        //timeExec = 80 + 60;                  // Approximate execution time(ms)
-        ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
-        for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(Osci_In);       // read and save approx 112us
-          // delayMicroseconds(288);            // timing adjustmet
-          delayMicroseconds(287);            // timing adjustmet tuned
-          if (switchPushed == true) {        // if any switch touched
-            break;                           // abandon record(this improve response)
-          }
-        }
-        break;
-      }
-    case 3: {                                // 2ms range
-        //timeExec = 16 + 60;                  // Approximate execution time(ms)
-        ADCSRA = ADCSRA | 0x06;              // dividing ratio = 64 (0x1=2, 0x2=4, 0x3=8, 0x4=16, 0x5=32, 0x6=64, 0x7=128)
-        for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(Osci_In);       // read and save approx 56us
-          // delayMicroseconds(24);             // timing adjustmet
-          delayMicroseconds(23);             // timing adjustmet tuned
-        }
-        break;
-      }
-    case 4: {                                // 500us range
-        //timeExec = 4 + 60;                   // Approximate execution time(ms)
-        ADCSRA = ADCSRA | 0x04;              // dividing ratio = 16(0x1=2, 0x2=4, 0x3=8, 0x4=16, 0x5=32, 0x6=64, 0x7=128)
-        for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(Osci_In);       // read and save approx 16us
-          delayMicroseconds(4);              // timing adjustmet
-          // time fine adjustment 0.0625 x 8 = 0.5us（nop=0.0625us @16MHz)
-          asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");
-        }
-        break;
-      }
-    case 5: {                                // 200us range
-        //timeExec = 2 + 60;                   // Approximate execution time(ms)
-        ADCSRA = ADCSRA | 0x02;              // dividing ratio = 4(0x1=2, 0x2=4, 0x3=8, 0x4=16, 0x5=32, 0x6=64, 0x7=128)
-        for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
-          waveBuff[i] = analogRead(Osci_In);       // read and save approx 6us
-          // time fine adjustment 0.0625 * 20 = 1.25us (nop=0.0625us @16MHz)
-          asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");
-          asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");
-        }
-        break;
-      }
-  }
+    }
 }
 
-static void dataAnalize(int &dataMin,int &dataMax,int &dataAve,int *waveBuff,int &trigP,boolean &trigSync,float &waveFreq,int &waveDuty) {                       // get various information from wave form
+  static void readWave(int *waveBuff) {                            // Record waveform to memory array
+    
+    //if (att10x == 1) {                         // if 1/10 attenuator required
+      //pinMode(12, OUTPUT);                     // assign attenuator controle pin to OUTPUT,
+      //digitalWrite(12, LOW);                   // and output LOW (output 0V)
+    //} else {                                   // if not required
+      //pinMode(12, INPUT);                      // assign the pin input (Hi-z)
+    //}
+    switchPushed = false;                      // Clear switch operation flag
+    ADCSRA = ADCSRA & 0xf8;
+    switch (hRange) {                          // set recording conditions in accordance with the range number
+      case 0: {                                // 200ms range
+          //timeExec = 1600 + 60;                // Approximate execution time(ms) Used for countdown until saving to EEPROM
+          ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
+          for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
+            waveBuff[i] = analogRead(Osci_In);       // read and save approx 112us
+            delayMicroseconds(7888);           // timing adjustment
+            if (switchPushed == true) {        // if any switch touched
+              switchPushed = false;
+              break;                           // abandon record(this improve response)
+            }
+          }
+          break;
+        }
+      case 1: {                                // 50ms range
+          //timeExec = 400 + 60;                 // Approximate execution time(ms)
+          ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
+          for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
+            waveBuff[i] = analogRead(Osci_In);       // read and save approx 112us
+            // delayMicroseconds(1888);           // timing adjustmet
+            delayMicroseconds(1880);           // timing adjustmet tuned
+
+            if (switchPushed == true) {        // if any switch touched
+              break;                           // abandon record(this improve response)
+            }
+          }
+          break;
+        }
+      case 2: {                                // 10ms range
+          //timeExec = 80 + 60;                  // Approximate execution time(ms)
+          ADCSRA = ADCSRA | 0x07;              // dividing ratio = 128 (default of Arduino）
+          for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
+            waveBuff[i] = analogRead(Osci_In);       // read and save approx 112us
+            // delayMicroseconds(288);            // timing adjustmet
+            delayMicroseconds(287);            // timing adjustmet tuned
+            if (switchPushed == true) {        // if any switch touched
+              break;                           // abandon record(this improve response)
+            }
+          }
+          break;
+        }
+      case 3: {                                // 2ms range
+          //timeExec = 16 + 60;                  // Approximate execution time(ms)
+          ADCSRA = ADCSRA | 0x06;              // dividing ratio = 64 (0x1=2, 0x2=4, 0x3=8, 0x4=16, 0x5=32, 0x6=64, 0x7=128)
+          for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
+            waveBuff[i] = analogRead(Osci_In);       // read and save approx 56us
+            // delayMicroseconds(24);             // timing adjustmet
+            delayMicroseconds(23);             // timing adjustmet tuned
+          }
+          break;
+        }
+      case 4: {                                // 500us range
+          //timeExec = 4 + 60;                   // Approximate execution time(ms)
+          ADCSRA = ADCSRA | 0x04;              // dividing ratio = 16(0x1=2, 0x2=4, 0x3=8, 0x4=16, 0x5=32, 0x6=64, 0x7=128)
+          for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
+            waveBuff[i] = analogRead(Osci_In);       // read and save approx 16us
+            delayMicroseconds(4);              // timing adjustmet
+            // time fine adjustment 0.0625 x 8 = 0.5us（nop=0.0625us @16MHz)
+            asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");
+          }
+          break;
+        }
+      case 5: {                                // 200us range
+          //timeExec = 2 + 60;                   // Approximate execution time(ms)
+          ADCSRA = ADCSRA | 0x02;              // dividing ratio = 4(0x1=2, 0x2=4, 0x3=8, 0x4=16, 0x5=32, 0x6=64, 0x7=128)
+          for (int i = 0; i < REC_LENG; i++) { // up to rec buffer size
+            waveBuff[i] = analogRead(Osci_In);       // read and save approx 6us
+            // time fine adjustment 0.0625 * 20 = 1.25us (nop=0.0625us @16MHz)
+            asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");
+            asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop"); asm("nop");
+          }
+          break;
+        }
+    }
+}
+
+static void dataAnalize(int &dataMin,int &dataMax,int &dataAve,int *waveBuff,int &trigP,boolean &trigSync,float &waveFreq,int &waveDuty) { 
+  // get various information from wave form
+
+  #define MAX_ADC_VALUE         (1023)                    // Maximum ADC value for 10-bit resolution
+  #define MIN_ADC_VALUE         (0)                       // Minimum ADC value
+  #define AVERAGE_DIVISOR       (20)                      // Divisor for average calculation
+  #define TRIG_CENTER           (REC_LENG / 2)            // Center point in the data range
+  #define MEDIAN_SEARCH_RADIUS  (REC_LENG/4)              // Range to search around center
+  #define TRIG_OFFSET           (MEDIAN_SEARCH_RADIUS+1)  // Range offset for trigger search (adjusted to 51 based on new size)
+
+
   int d;
   long sum = 0;
 
@@ -316,7 +329,7 @@ static void dataAnalize(int &dataMin,int &dataMax,int &dataAve,int *waveBuff,int
   dataAve = (sum + 10) / 20;               // Average value calculation (calculated by 10 times to improve accuracy)
 
   // Trigger position search
-  for (trigP = ((REC_LENG / 2) - 51); trigP < ((REC_LENG / 2) + 50); trigP++) { // Find the points that straddle the median at the center ± 50 of the data range
+  for (trigP = ((REC_LENG / 2) - TRIG_OFFSET); trigP < ((REC_LENG / 2) + MEDIAN_SEARCH_RADIUS); trigP++) { // Find the points that straddle the median at the center ± 50 of the data range
       // if trigger direction is positive
       if ((waveBuff[trigP - 1] < (dataMax + dataMin) / 2) && (waveBuff[trigP] >= (dataMax + dataMin) / 2)) {
         break;                                    // positive trigger position found !
@@ -324,7 +337,7 @@ static void dataAnalize(int &dataMin,int &dataMax,int &dataAve,int *waveBuff,int
     
   }
   trigSync = true;
-  if (trigP >= ((REC_LENG / 2) + 50)) {           // If the trigger is not found in range
+  if (trigP >= ((REC_LENG / 2) + MEDIAN_SEARCH_RADIUS)) {           // If the trigger is not found in range
     trigP = (REC_LENG / 2);                       // Set it to the center for the time being
     trigSync = false;                             // set Unsync display flag
   }
@@ -503,10 +516,10 @@ int &rangeMax,int &rangeMaxDisp,int &rangeMin,int &rangeMinDisp,int &trigP,boole
 static void plotData(int *waveBuff,int &rangeMax,int &rangeMaxDisp,int &rangeMin,int &rangeMinDisp,
 int &trigP,boolean &trigSync,float &waveFreq,int &waveDuty) {                    // plot wave form on OLED
   long y1, y2;
-  for (int x = 0; x <= 98; x++) {
-    y1 = map(waveBuff[x + trigP - 50], rangeMin, rangeMax, 63, 9); // convert to plot address
+  for (int x = 0; x < REC_LENG/2-1 ; x++) {
+    y1 = map(waveBuff[x + trigP - REC_LENG/4], rangeMin, rangeMax, 63, 9); // convert to plot address
     y1 = constrain(y1, 9, 63);                                     // Crush(Saturate) the protruding part
-    y2 = map(waveBuff[x + trigP - 49], rangeMin, rangeMax, 63, 9); // to address calucurate
+    y2 = map(waveBuff[x + trigP - REC_LENG/4+1], rangeMin, rangeMax, 63, 9); // to address calucurate
     y2 = constrain(y2, 9, 63);                                     //
     oled.drawLine(x + 27, y1, x + 28, y2, WHITE);                  // connect between point
   }
