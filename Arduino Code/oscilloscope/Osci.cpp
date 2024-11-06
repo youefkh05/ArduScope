@@ -517,11 +517,17 @@ static void plotData(int *waveBuff,int &rangeMax,int &rangeMaxDisp,int &rangeMin
 int &trigP,boolean &trigSync,float &waveFreq,int &waveDuty) {                    // plot wave form on OLED
   long y1, y2;
   for (int x = 0; x < REC_LENG/2-1 ; x++) {
-    y1 = map(waveBuff[x + trigP - REC_LENG/4], rangeMin, rangeMax, 63, 9); // convert to plot address
-    y1 = constrain(y1, 9, 63);                                     // Crush(Saturate) the protruding part
-    y2 = map(waveBuff[x + trigP - REC_LENG/4+1], rangeMin, rangeMax, 63, 9); // to address calucurate
-    y2 = constrain(y2, 9, 63);                                     //
-    oled.drawLine(x + 27, y1, x + 28, y2, WHITE);                  // connect between point
+    int plotX = map(2*x, 0, REC_LENG - 1, 27, 124);  // Scale the x-coordinate to fit the full width of the display (128 pixels)
+                                  
+    // Map the data point to vertical positions (y-values) and constrain them to valid OLED range
+    y1 = map(waveBuff[x + trigP - REC_LENG / 4], rangeMin, rangeMax, 63, 9);  // convert to plot address
+    y1 = constrain(y1, 9, 63);  // Constrain to OLED screen height
+    
+    y2 = map(waveBuff[x + trigP - REC_LENG / 4 + 1], rangeMin, rangeMax, 63, 9);  // next data point
+    y2 = constrain(y2, 9, 63);  // Constrain to OLED screen height
+
+    oled.drawLine(plotX, y1, plotX + 1, y2, WHITE);  // Connect the points with a line
+    //oled.drawLine(plotX, y1, plotX + 1, y2, WHITE);  // Connect the points with a line
   }
 }
 
