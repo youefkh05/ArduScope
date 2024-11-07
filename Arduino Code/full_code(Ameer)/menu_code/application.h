@@ -34,14 +34,6 @@ typedef enum menus
 };
 
 
-/*
-typedef enum sig_type
-{
-  Off,
-  Square,
-  Triangular,
-  Sine
-};
-*/
+void configMenu(void);
 
 #endif /* APPLICATION_H*/
