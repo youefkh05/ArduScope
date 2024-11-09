@@ -245,11 +245,13 @@ void loop() {
               case 3:
                 selected_menu = SigGenMenu;
                 item_selected = 0;
+                NUM_ITEMS = 4;
                 break;
 
               case 4:
                 selected_menu = ConfigMenu;
                 item_selected = 0;
+                NUM_ITEMS = 3;
                 break;
             }
           break; // End of Case MainMenu ********************************************************************************
