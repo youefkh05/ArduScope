@@ -3,9 +3,9 @@
  <FRAME activewindow="0">
   <PLACEMENT>2c0000000200000003000000ffffffffffffffffffffffffffffffff0000000000000000680600001e040000</PLACEMENT>
   <WINDOW type="default" module="ISIS">
-   <editor metric="0" gridmajor="2540000" mode="00000015" zoom="0" scale="100" flipped="0" gridminor="254000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="127000">
+   <editor metric="0" gridmajor="25400000" mode="00000000" zoom="0" scale="69" flipped="0" gridminor="508000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="184057">
     <world y1="-17780000" x1="-21590000" y2="17780000" x2="21590000"/>
-    <centre x="7620000" y="3556000"/>
+    <centre x="-11938000" y="254000"/>
     <origin x="0" y="0"/>
    </editor>
   </WINDOW>
@@ -18,9 +18,9 @@
   </editor>
  </MODULE>
  <MODULE name="ISIS">
-  <editor metric="0" gridmajor="2540000" mode="00000015" zoom="0" scale="100" flipped="0" gridminor="254000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="127000">
+  <editor metric="0" gridmajor="25400000" mode="00000000" zoom="0" scale="69" flipped="0" gridminor="508000" gridmode="32" snapidx="2" snap="254000" xcursor="16" orgmode="0" snaprange="184057">
    <world y1="-17780000" x1="-21590000" y2="17780000" x2="21590000"/>
-   <centre x="7620000" y="3556000"/>
+   <centre x="-11938000" y="254000"/>
    <origin x="0" y="0"/>
   </editor>
  </MODULE>
@@ -205,7 +205,7 @@
      <ITEM name="TopLineAddress">00000000</ITEM>
     </PROPERTIES>
    </POPUP>
-   <POPUP w="16" x="188" flags="80000000" y="300" h="32" pid="14" iid="6">
+   <POPUP w="16" x="188" flags="00000000" y="300" h="32" pid="14" iid="6">
     <PROPERTIES>
      <ITEM name="DataType">2</ITEM>
      <ITEM name="DispChars">Yes</ITEM>

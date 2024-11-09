@@ -32,6 +32,7 @@
 #define   Down_Bot          (10)
 #define   Hold_Bot          (11)
 #define   Osci_In           (A0)
+#define   Sig_In              
 
 /*
 typedef struct flag_type
