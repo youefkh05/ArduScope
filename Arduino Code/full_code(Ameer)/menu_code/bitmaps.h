@@ -1,6 +1,8 @@
 /*
 	Contains Bitmap codes for arduino Oled
 */
+#ifndef BITMAPS_H
+#define BITMAPS_H
 
 /*************************************************************************************************/
 /*
@@ -111,4 +113,4 @@ const unsigned char epd_bitmap_bg [] PROGMEM = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-
+#endif /* BITMAPS_H */
