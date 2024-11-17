@@ -41,6 +41,7 @@ typedef enum menus
   AmmeterMenu,
   OhmmeterMenu,
   SigGenMenu,
+  Scope,
   ConfigMenu
 };
 
